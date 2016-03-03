@@ -3,7 +3,7 @@ dependencies {
 
     testCompile project(':dap4:d4core')
     testCompile project(':dap4:d4shared')
-    testCompile project(':dap4:d4servletshared')
+    testCompile project(':dap4:d4servlet')
     testCompile project(':dap4:d4ts')
     testCompile project(':dap4:d4cdm')
     testCompile project(':cdm')
