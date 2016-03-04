@@ -189,18 +189,18 @@ public class DMRPrint
 
         case ENUMERATION:
             if (!ce.references(node)) break;
-            DapEnum en = (DapEnum) node;
+            DapEnumeration en = (DapEnumeration) node;
             printer.marginPrint("<" + dmrname);
             printXMLAttributes(en, ce, NILFLAGS);
             printer.println(">");
             printer.indent();
             List<String> econstnames = en.getNames();
             for (String econst : econstnames) {
-                Long value = en.lookup(econst);
+                DapEnumConst value = en.lookup(econst);
                 assert (value != null);
                 printer.marginPrintln(
-                        String.format("<EnumConst name=\"%s\" value=\"%s\"/>",
-                                Escape.entityEscape(econst), value.toString()));
+                        String.format("<EnumConst name=\"%s\" value=\"%d\"/>",
+                                Escape.entityEscape(econst), value.getValue()));
             }
             printMetadata(node, ce);
             printer.outdent();
@@ -232,7 +232,7 @@ public class DMRPrint
             DapAtomicVariable var = (DapAtomicVariable) node;
             // Get the type sort of the variable
             DapType basetype = var.getBaseType();
-            printer.marginPrint("<" + basetype.getAtomicType().name());
+            printer.marginPrint("<" + basetype.getTypeSort().name());
             printXMLAttributes(node, ce, NILFLAGS);
             if (hasMetadata(node) || hasDimensions(var) || hasMaps(var)) {
                 printer.println(">");
@@ -244,7 +244,7 @@ public class DMRPrint
                 if (hasMaps(var))
                     printMaps(var, ce);
                 printer.outdent();
-                printer.marginPrint("</" + basetype.getAtomicType().name() + ">");
+                printer.marginPrint("</" + basetype.getTypeSort().name() + ">");
             } else
                 printer.print("/>");
             break;
@@ -300,7 +300,7 @@ public class DMRPrint
             break;
 
         case ENUMERATION:
-            printXMLAttribute("basetype", ((DapEnum) node).getBaseType().getTypeName(), flags);
+            printXMLAttribute("basetype", ((DapEnumeration) node).getBaseType().getTypeName(), flags);
             break;
 
         case ATOMICVARIABLE:
@@ -397,13 +397,13 @@ public class DMRPrint
     {
         printer.marginPrint("<Attribute");
         printXMLAttributes(attr, ce, NILFLAGS);
-        List<Object> values = attr.getValues();
+        Object[] values = attr.getValues();
         printer.println(">");
         if (values == null)
             throw new DapException("Attribute with no values:" + attr.getFQN());
         printer.indent();
-        if (values.size() == 1) {
-            printer.marginPrintln(String.format("<Value value=\"%s\"/>", getPrintValue(values.get(0))));
+        if (values.length == 1) {
+            printer.marginPrintln(String.format("<Value value=\"%s\"/>", getPrintValue(values[0])));
         } else {
             printer.marginPrintln("<Value>");
             printer.indent();

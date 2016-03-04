@@ -179,8 +179,7 @@ public class Dap4Parser extends Dap4ParserBody
                   List<String> nslist, DapNode parent)
         throws DapException
     {
-        DapAttribute attr
-            = (DapAttribute) newNode(name, sort);
+        DapAttribute attr = factory.newAttribute(name, basetype);
         if(sort == DapSort.ATTRIBUTE) {
             attr.setBaseType(basetype);
         }
@@ -249,7 +248,7 @@ public class Dap4Parser extends Dap4ParserBody
                 throw new ParseException("Attribute: DATA DMR: Attempt to change attribute type: " + typename);
             attr.clearValues();
             if(value != null)
-                attr.addValue(value.value);
+                attr.setValues(new Object[]{value.value});
             break;
         case ATTRIBUTESET:
             // clear the contained attributes
@@ -306,9 +305,7 @@ public class Dap4Parser extends Dap4ParserBody
             textlist.add(value.value);
         }
         if(textlist != null)
-            for(String v : textlist) {
-                parent.addValue(v);
-            }
+            parent.setValues(textlist.toArray());
     }
 
     DapAttribute
@@ -351,18 +348,6 @@ public class Dap4Parser extends Dap4ParserBody
     }
 */
     //////////////////////////////////////////////////
-    // Factory wrapper
-    @Override
-    DapNode newNode(String name, DapSort sort)
-        throws ParseException
-    {
-        DapNode node = (DapNode) factory.newNode(sort);
-        node.setDataset(this.root);
-        if(name != null) node.setShortName(name);
-        return node;
-    }
-
-    //////////////////////////////////////////////////
     // Abstract action definitions
 
     @Override
@@ -394,7 +379,7 @@ public class Dap4Parser extends Dap4ParserBody
         }
         if(ndmrversion != DMRVERSION)
             throw new ParseException("Dataset dmrVersion mismatch: " + dmrversion.value);
-        this.root = (DapDataset) newNode(name.value, DapSort.DATASET);
+        this.root = factory.newDataset(name.value);
         this.root.setDapVersion(Float.toString(ndapversion));
         this.root.setDMRVersion(Float.toString(ndmrversion));
         this.root.setDataset(this.root);
@@ -433,7 +418,7 @@ public class Dap4Parser extends Dap4ParserBody
                 if(group == null)
                     throw new ParseException("Group name does not match template: " + name.value);
             } else {
-                group = (DapGroup) newNode(name.value, DapSort.GROUP);
+                group = factory.newGroup(name.value);
                 parent.addDecl(group);
             }
             scopestack.push(group);
@@ -465,7 +450,7 @@ public class Dap4Parser extends Dap4ParserBody
             SaxEvent basetype = pull(attrs, "basetype");
             DapType basedaptype = null;
             if(basetype == null) {
-                basedaptype = DapEnum.DEFAULTBASETYPE;
+                basedaptype = DapEnumeration.DEFAULTBASETYPE;
             } else {
                 String typename = basetype.value;
                 if("Byte".equalsIgnoreCase(typename)) typename = "UInt8";
@@ -473,7 +458,7 @@ public class Dap4Parser extends Dap4ParserBody
                 if(basedaptype == null || !islegalenumtype(basedaptype))
                     throw new ParseException("Enumdef: Invalid Enum Declaration Type name: " + basetype.value);
             }
-            DapEnum dapenum = null;
+            DapEnumeration dapenum = null;
             if(isdatadmr) {
                 // Locate the corresponding template parent: group or structure or sequence
                 DapNode parent = getParentScope();
@@ -481,7 +466,7 @@ public class Dap4Parser extends Dap4ParserBody
                 switch (parent.getSort()) {
                 case DATASET:
                 case GROUP:
-                    dapenum = (DapEnum) ((DapGroup) parent).findByName(name.value, DapSort.ENUMERATION);
+                    dapenum = (DapEnumeration) ((DapGroup) parent).findByName(name.value, DapSort.ENUMERATION);
                     break;
                 default:
                     assert false : "Internal Error";
@@ -492,8 +477,7 @@ public class Dap4Parser extends Dap4ParserBody
                 if(dapenum.getBaseType() != basedaptype)
                     throw new ParseException("Template enumeration mismatch: " + name.value);
             } else {
-                dapenum = (DapEnum) newNode(name.value, DapSort.ENUMERATION);
-                dapenum.setBaseType(basedaptype);
+                dapenum = factory.newEnumeration(name.value, basedaptype);
                 DapGroup parent = getGroupScope();
                 parent.addDecl(dapenum);
             }
@@ -510,7 +494,7 @@ public class Dap4Parser extends Dap4ParserBody
         throws ParseException
     {
         if(debug) report("leaveenumdef");
-        DapEnum eparent = (DapEnum) scopestack.pop();
+        DapEnumeration eparent = (DapEnumeration) scopestack.pop();
         List<String> econsts = eparent.getNames();
         if(econsts.size() == 0)
             throw new ParseException("Enumdef: no enum constants specified");
@@ -535,17 +519,17 @@ public class Dap4Parser extends Dap4ParserBody
             throw new ParseException("Enumconst: illegal value: " + value.value);
         }
         try {
-            DapEnum parent = (DapEnum) getScope(DapSort.ENUMERATION);
+            DapEnumeration parent = (DapEnumeration) getScope(DapSort.ENUMERATION);
             // Verify that the name is a legal enum constant name, which is restricted
             // vis-a-vis other names
             if(!ParseUtil.isLegalEnumConstName(name.value))
                 throw new ParseException("Enumconst: illegal enumeration constant name: " + name.value);
             if(isdatadmr) {// verify that the constant is in the enumeration
-                long templatevalue = parent.lookup(name.value);
-                String templatename = parent.lookup(lvalue);
-                if(lvalue != templatevalue || !name.value.equals(templatename))
-                    throw new ParseException(String.format("Template enumeration constant mismatch: %s.%s=%d",
-                        parent.getShortName(), templatename, templatevalue));
+                DapEnumConst leconst = parent.lookup(name.value);
+                DapEnumConst seconst = parent.lookup(lvalue);
+                if(leconst != null || seconst != null)
+                    throw new ParseException(String.format("Template enumeration constant mismatch: %s.%s",
+                        parent.getShortName(), leconst));
             } else
                 parent.addEnumConst(name.value, lvalue);
         } catch (DapException de) {
@@ -593,8 +577,7 @@ public class Dap4Parser extends Dap4ParserBody
                 if(dim.getSize() != lvalue)
                     throw new ParseException("Template dimension size mismatch: " + name.value);
             } else {
-                dim = (DapDimension) newNode(name.value, DapSort.DIMENSION);
-                dim.setSize(lvalue);
+                dim = factory.newDimension(name.value, lvalue);
                 dim.setShared(true);
                 DapGroup parent = getGroupScope();
                 parent.addDecl(dim);
@@ -708,13 +691,11 @@ public class Dap4Parser extends Dap4ParserBody
                 }
                 // Verify consistency
                 if(var.getSort() != DapSort.ATOMICVARIABLE
-                    || var.getBaseType() != var.getBaseType())
+                    || ((DapAtomicVariable)var).getBaseType() != ((DapAtomicVariable)var).getBaseType())
                     throw new ParseException("Template variable mismatch: " + name.value);
             } else { //!isdatadmr
                 // Do type substitutions
-                var
-                    = (DapVariable) newNode(name.value, DapSort.ATOMICVARIABLE);
-                var.setBaseType(basetype);
+                var = factory.newAtomicVariable(name.value,basetype);
                 // Look at the parent scope
                 DapNode parent = scopestack.peek();
                 if(parent == null)
@@ -745,10 +726,10 @@ public class Dap4Parser extends Dap4ParserBody
     {
         String typename = close.name;
         if("Byte".equals(typename)) typename = "UInt8"; // special case
-        AtomicType atype = AtomicType.getAtomicType(typename);
+        TypeSort atype = TypeSort.getTypeSort(typename);
         DapVariable var = (DapVariable) searchScope(sort);
         assert var != null;
-        AtomicType vartype = var.getBaseType().getAtomicType();
+        TypeSort vartype = var.getBaseType().getTypeSort();
         if(atype == null)
             throw new ParseException("Variable: Illegal type: " + typename);
         if(atype != vartype)
@@ -786,7 +767,7 @@ public class Dap4Parser extends Dap4ParserBody
                 throw new ParseException("Enumvariable: Empty variable name");
             if(isempty(enumtype))
                 throw new ParseException("Enumvariable: Empty enum type name");
-            DapEnum target = (DapEnum) root.findByFQN(enumtype.value, DapSort.ENUMERATION);
+            DapEnumeration target = (DapEnumeration) root.findByFQN(enumtype.value, DapSort.ENUMERATION);
             if(target == null)
                 throw new ParseException("EnumVariable: no such enum: " + name.value);
             DapVariable var = null;
@@ -812,8 +793,7 @@ public class Dap4Parser extends Dap4ParserBody
                 if(var.getBaseType() != target)
                     throw new ParseException("Template mismatch: " + name.value);
             } else {
-                var = (DapVariable) newNode(name.value, DapSort.ATOMICVARIABLE);
-                var.setBaseType(target);
+                var = factory.newAtomicVariable(name.value, target);
                 // Look at the parent scope
                 DapNode parent = scopestack.peek();
                 if(parent == null)
@@ -878,8 +858,7 @@ public class Dap4Parser extends Dap4ParserBody
         if((container.getSort() == DapSort.STRUCTURE || container.getSort() == DapSort.SEQUENCE)
             && container == scope)
             throw new ParseException("Mapref: map variable not in outer scope: " + name.name);
-        DapMap map = (DapMap) newNode(DapSort.MAP);
-        map.setVariable(var);
+        DapMap map = factory.newMap(var);
         try {
             // Pull the top variable scope
             DapVariable parent = (DapVariable) searchScope(DapSort.ATOMICVARIABLE, DapSort.STRUCTURE, DapSort.SEQUENCE);
@@ -933,8 +912,7 @@ public class Dap4Parser extends Dap4ParserBody
                 if(var.getSort() != DapSort.STRUCTURE && var.getSort() != DapSort.SEQUENCE)
                     throw new ParseException("Template variable mismatch: " + name.value);
             } else {
-                var = (DapStructure) newNode(name.value, DapSort.STRUCTURE);
-                var.setBaseType(DapType.STRUCT);
+                var = factory.newStructure(name.value);
                 // Look at the parent scope
                 DapNode parent = scopestack.peek();
                 if(parent == null)
@@ -1002,8 +980,7 @@ public class Dap4Parser extends Dap4ParserBody
                 if(var.getSort() != DapSort.SEQUENCE)
                     throw new ParseException("Template variable mismatch: " + name.value);
             } else {
-                var = (DapSequence) newNode(name.value, DapSort.SEQUENCE);
-                var.setBaseType(DapType.SEQ);
+                var = factory.newSequence(name.value);
                 // Look at the parent scope
                 DapNode parent = scopestack.peek();
                 if(parent == null)
@@ -1074,7 +1051,7 @@ public class Dap4Parser extends Dap4ParserBody
         if(debug) report("leaveatomicattribute");
         DapAttribute attr = (DapAttribute) scopestack.pop();
         // Ensure that the attribute has at least one value
-        if(attr.getValues().size() == 0)
+        if(attr.getValues().length == 0)
             throw new ParseException("AtomicAttribute: attribute has no values");
     }
 

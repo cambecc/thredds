@@ -190,18 +190,18 @@ public class Dap4Print
             break;
 
         case ENUMERATION:
-            DapEnum en = (DapEnum) node;
+            DapEnumeration en = (DapEnumeration) node;
             printer.marginPrint("<" + dmrname);
             printXMLAttributes(en, NILFLAGS);
             printer.println(">");
             printer.indent();
             List<String> econstnames = en.getNames();
             for(String econst : econstnames) {
-                Long value = en.lookup(econst);
+                DapEnumConst value = en.lookup(econst);
                 assert (value != null);
                 printer.marginPrintln(
-                    String.format("<EnumConst name=\"%s\" value=\"%s\"/>",
-                        Escape.entityEscape(econst), value.toString()));
+                    String.format("<EnumConst name=\"%s\" value=\"%d\"/>",
+                        Escape.entityEscape(econst), value.getValue()));
             }
             printMetadata(node);
             printer.outdent();
@@ -230,7 +230,7 @@ public class Dap4Print
             DapAtomicVariable var = (DapAtomicVariable) node;
             // Get the type sort of the variable
             DapType basetype = var.getBaseType();
-            printer.marginPrint("<" + basetype.getAtomicType().name());
+            printer.marginPrint("<" + basetype.getTypeSort().name());
             printXMLAttributes(node, NILFLAGS);
             if(hasMetadata(node) || hasDimensions(var) || hasMaps(var)) {
                 printer.println(">");
@@ -242,7 +242,7 @@ public class Dap4Print
                 if(hasMaps(var))
                     printMaps(var);
                 printer.outdent();
-                printer.marginPrint("</" + basetype.getAtomicType().name() + ">");
+                printer.marginPrint("</" + basetype.getTypeSort().name() + ">");
             } else
                 printer.print("/>");
             break;
@@ -288,7 +288,7 @@ public class Dap4Print
             break;
 
         case ENUMERATION:
-            printXMLAttribute("basetype", ((DapEnum) node).getBaseType().getTypeName(), flags);
+            printXMLAttribute("basetype", ((DapEnumeration) node).getBaseType().getTypeName(), flags);
             break;
 
         case ATOMICVARIABLE:
@@ -386,13 +386,13 @@ public class Dap4Print
     {
         printer.marginPrint("<Attribute");
         printXMLAttributes(attr, NILFLAGS);
-        List<Object> values = attr.getValues();
+        Object[] values = attr.getValues();
         printer.println(">");
         if(values == null)
             throw new DapException("Attribute with no values:" + attr.getFQN());
         printer.indent();
-        if(values.size() == 1) {
-            printer.marginPrintln(String.format("<Value value=\"%s\"/>", getPrintValue(values.get(0))));
+        if(values.length == 1) {
+            printer.marginPrintln(String.format("<Value value=\"%s\"/>", getPrintValue(values[0])));
         } else {
             printer.marginPrintln("<Value>");
             printer.indent();
@@ -492,7 +492,7 @@ public class Dap4Print
             long nelems = atom.getCount();
             long nrows = (nelems > 0 ? (nelems + (COLUMNS - 1)) / nelems : 0);
             printer.marginPrintf("<%s name=\"%s\">",
-                dapv.getBaseType().getAtomicType().name(),
+                dapv.getBaseType().getTypeSort().name(),
                 dapv.getShortName());
             printer.eol();
             printer.indent();
@@ -509,7 +509,7 @@ public class Dap4Print
                 printer.eol();
             }
             printer.outdent();
-            printer.marginPrintf("</%s>", dapv.getBaseType().getAtomicType().name());
+            printer.marginPrintf("</%s>", dapv.getBaseType().getTypeSort().name());
         } else if(datav.getSort() == DataSort.COMPOUNDARRAY) {
             try {
                 D4DataCompoundArray cmpd = (D4DataCompoundArray) datav;
@@ -593,7 +593,7 @@ public class Dap4Print
         throws DataException
     {
         if(value == null) return "null";
-        AtomicType atype = basetype.getAtomicType();
+        TypeSort atype = basetype.getTypeSort();
         boolean unsigned = atype.isUnsigned();
         switch (atype) {
         case Int8:
@@ -642,7 +642,7 @@ public class Dap4Print
             }
             return s.toString();
         case Enum:
-            return valueString(value, ((DapEnum) basetype).getBaseType());
+            return valueString(value, ((DapEnumeration) basetype).getBaseType());
         default:
             break;
         }

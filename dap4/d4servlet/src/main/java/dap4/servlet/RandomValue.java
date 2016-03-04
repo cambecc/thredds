@@ -49,7 +49,7 @@ public class RandomValue extends Value
         throws DapException
     {
 	Object value = null;
-        AtomicType atomtype = basetype.getAtomicType();
+        TypeSort atomtype = basetype.getTypeSort();
         if(atomtype.isIntegerType())
             value = nextInteger(basetype);
         else if(atomtype.isFloatType())
@@ -87,7 +87,7 @@ public class RandomValue extends Value
 	    break;
         case Enum:
             //Coverity[FB.BC_UNCONFIRMED_CAST]
-            value = nextEnum(((DapEnum) basetype));
+            value = nextEnum(((DapEnumeration) basetype));
 	    break;
         default:
             throw new DapException("Unexpected type: " + basetype);
@@ -109,7 +109,7 @@ public class RandomValue extends Value
     nextInteger(DapType basetype)
         throws DapException
     {
-        AtomicType atomtype = basetype.getAtomicType();
+        TypeSort atomtype = basetype.getTypeSort();
         if(!atomtype.isIntegerType())
             throw new DapException("Unexpected type: " + basetype);
         boolean unsigned = atomtype.isUnsigned();
@@ -141,7 +141,7 @@ public class RandomValue extends Value
     nextFloat(DapType basetype)
         throws DapException
     {
-        AtomicType atomtype = basetype.getAtomicType();
+        TypeSort atomtype = basetype.getTypeSort();
         switch (atomtype) {
         case Float32:
             return random.nextFloat();
@@ -154,18 +154,18 @@ public class RandomValue extends Value
     }
 
     Object
-    nextEnum(DapEnum en)
+    nextEnum(DapEnumeration en)
     {
         long l;
-        AtomicType basetype = en.getBaseType().getAtomicType();
+        TypeSort basetype = en.getBaseType().getTypeSort();
 
         // Collect the enum const values as BigIntegers
         List<String> ecnames = en.getNames();
         BigInteger[] econsts = new BigInteger[ecnames.size()];
         for(int i = 0;i < econsts.length;i++) {
-            l = en.lookup(ecnames.get(i));
-            econsts[i] = BigInteger.valueOf(l);
-            if(basetype == AtomicType.UInt64)
+            DapEnumConst ec = en.lookup(ecnames.get(i));
+            econsts[i] = BigInteger.valueOf(ec.getValue());
+            if(basetype == TypeSort.UInt64)
                 econsts[i] = econsts[i].and(MASK);
         }
 

@@ -7,7 +7,6 @@ package dap4.ce;
 import dap4.core.data.*;
 import dap4.core.dmr.*;
 import dap4.core.util.*;
-import dap4.servlet.DapSerializer;
 
 import java.util.*;
 
@@ -398,7 +397,7 @@ public class CEConstraint implements Constraint
     protected List<DapDimension> dimrefs = new ArrayList<>();
 
     // List of enumeration decls to be included
-    protected List<DapEnum> enums = new ArrayList<>();
+    protected List<DapEnumeration> enums = new ArrayList<>();
 
     // List of group decls to be included
     protected List<DapGroup> groups = new ArrayList<>();
@@ -628,10 +627,9 @@ public class CEConstraint implements Constraint
             isref = this.dimrefs.contains(dim);
             break;
         case ENUMERATION:
-            isref = (this.enums.contains((DapEnum) node));
+            isref = (this.enums.contains((DapEnumeration) node));
             break;
         case ATOMICVARIABLE:
-        case GRID:
         case SEQUENCE:
         case STRUCTURE:
             isref = (findVariableIndex((DapVariable) node) >= 0);
@@ -1048,8 +1046,8 @@ public class CEConstraint implements Constraint
             DapType daptype = var.getBaseType();
             if(!daptype.isEnumType())
                 continue;
-            if(!this.enums.contains((DapEnum) daptype))
-                this.enums.add((DapEnum) daptype);
+            if(!this.enums.contains((DapEnumeration) daptype))
+                this.enums.add((DapEnumeration) daptype);
         }
     }
 
@@ -1079,7 +1077,7 @@ public class CEConstraint implements Constraint
             }
         }
         // 2. enumerations
-        for(DapEnum en : this.enums) {
+        for(DapEnumeration en : this.enums) {
             List<DapGroup> path = en.getGroupPath();
             for(DapGroup group : path) {
                 if(!this.groups.contains(group))

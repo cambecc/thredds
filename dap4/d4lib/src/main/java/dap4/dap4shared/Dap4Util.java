@@ -35,7 +35,7 @@ abstract public class Dap4Util
      * @return the size, in databuffer
      */
     static public int
-    daptypeSize(AtomicType atomtype)
+    daptypeSize(TypeSort atomtype)
     {
         switch (atomtype) {
         case Char: // remember serial size is 1, not 2.
@@ -61,7 +61,7 @@ abstract public class Dap4Util
 
 
     static public Object
-    createVector(AtomicType atype, long count)
+    createVector(TypeSort atype, long count)
         throws DataException
     {
         int icount = (int) count;
@@ -120,13 +120,13 @@ abstract public class Dap4Util
     {
         int i;
 
-        AtomicType srcatomtype = srctype.getPrimitiveType();
-        AtomicType dstatomtype = dsttype.getPrimitiveType();
+        TypeSort srcatomtype = srctype.getAtomicType();
+        TypeSort dstatomtype = dsttype.getAtomicType();
 
         if(srcatomtype == dstatomtype)
             return src;
         if(srcatomtype.isIntegerType()
-            && AtomicType.getSignedVersion(srcatomtype) == AtomicType.getSignedVersion(dstatomtype))
+            && TypeSort.getSignedVersion(srcatomtype) == TypeSort.getSignedVersion(dstatomtype))
             return src;
 
         Object result = null;

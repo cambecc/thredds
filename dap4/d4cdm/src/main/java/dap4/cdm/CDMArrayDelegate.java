@@ -5,12 +5,8 @@
 package dap4.cdm;
 
 import dap4.core.dmr.*;
-import dap4.core.util.DapException;
 import dap4.dap4shared.DSP;
 import dap4.dap4shared.D4DSP;
-import ucar.ma2.Range;
-
-import java.util.List;
 
 /**
  * Since we can't use AbstractCDMArray,
@@ -29,7 +25,7 @@ class CDMArrayDelegate implements CDMArray
     protected DapVariable template = null;
     protected long bytesize = 0;
     protected DapType basetype = null;
-    protected AtomicType primitivetype = null;
+    protected TypeSort primitivetype = null;
 
     /* The implementing class will need to
        initialize the fields.
@@ -73,7 +69,7 @@ class CDMArrayDelegate implements CDMArray
     }
 
     @Override
-    public AtomicType getPrimitiveType()
+    public TypeSort getPrimitiveType()
     {
         return this.primitivetype;
     }

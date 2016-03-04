@@ -33,7 +33,7 @@ public class DapDataset extends DapGroup
     protected List<DapVariable> topvariables = null;
     protected List<DapVariable> allvariables = null;
     protected List<DapGroup> allgroups = null;
-    protected List<DapEnum> allenums = null;
+    protected List<DapEnumeration> allenums = null;
     protected List<DapDimension> alldimensions = null;
 
     protected boolean finished = false;
@@ -63,7 +63,7 @@ public class DapDataset extends DapGroup
         this.topvariables = new ArrayList<DapVariable>();
         this.allvariables = new ArrayList<DapVariable>();
         this.allgroups = new ArrayList<DapGroup>();
-        this.allenums = new ArrayList<DapEnum>();
+        this.allenums = new ArrayList<DapEnumeration>();
         this.alldimensions = new ArrayList<DapDimension>();
         finishR(this);
     }
@@ -81,10 +81,9 @@ public class DapDataset extends DapGroup
             this.alldimensions.add((DapDimension) node);
             break;
         case ENUMERATION:
-            this.allenums.add((DapEnum) node);
+            this.allenums.add((DapEnumeration) node);
             break;
         case ATOMICVARIABLE:
-        case GRID:
         case SEQUENCE:
         case STRUCTURE:
             if(node.isTopLevel())
@@ -209,7 +208,7 @@ public class DapDataset extends DapGroup
         return this.groups;
     }
 
-    public List<DapEnum>
+    public List<DapEnumeration>
     getAllEnums()
     {
         return this.enums;
@@ -346,7 +345,7 @@ public class DapDataset extends DapGroup
                 for(int i = 0;i < dims.size();i++) {
                     sortR(dims.get(i), sortlist);
                 }
-            List<DapEnum> enums = group.getEnums();
+            List<DapEnumeration> enums = group.getEnums();
             if(enums != null)
                 for(int i = 0;i < enums.size();i++) {
                     sortR(enums.get(i), sortlist);
@@ -362,7 +361,6 @@ public class DapDataset extends DapGroup
                     sortR(groups.get(i), sortlist);
                 }
             break;
-        case GRID:
         case SEQUENCE:
         case STRUCTURE:
             DapStructure struct = (DapStructure) node;

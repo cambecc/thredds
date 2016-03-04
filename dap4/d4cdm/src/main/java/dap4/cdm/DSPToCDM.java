@@ -73,10 +73,10 @@ public class DSPToCDM
         }
 
         // Create enums in this group
-        for(DapEnum dapenum : dapparent.getEnums()) {
+        for(DapEnumeration dapenum : dapparent.getEnums()) {
             DapType basetype = dapenum.getBaseType();
             DataType cdmbasetype;
-            switch (basetype.getAtomicType()) {
+            switch (basetype.getTypeSort()) {
             case Char:
             case Int8:
             case UInt8:
@@ -98,14 +98,14 @@ public class DSPToCDM
                 break;
 
             default:
-                throw new DapException("Illegal DapEnum basetype");
+                throw new DapException("Illegal DapEnumeration basetype");
             }
 
             Map<Integer, String> map = new HashMap<Integer, String>();
             List<String> ecnames = dapenum.getNames();
             for(String ecname : ecnames) {
-                Long value = dapenum.lookup(ecname);
-                map.put(value.intValue(), ecname);
+                DapEnumConst value = dapenum.lookup(ecname);
+                map.put(value.getIntValue(), ecname);
             }
 
             EnumTypedef cdmenum = new EnumTypedef(dapenum.getShortName(),
@@ -275,13 +275,13 @@ public class DSPToCDM
     }
 
     protected EnumTypedef
-    createEnum(DapEnum dapenum, Group cdmparent,
+    createEnum(DapEnumeration dapenum, Group cdmparent,
                NodeMap nodemap)
         throws DapException
     {
         DapType basetype = dapenum.getBaseType();
         DataType cdmbasetype;
-        switch (basetype.getAtomicType()) {
+        switch (basetype.getTypeSort()) {
         case Char:
         case Int8:
         case UInt8:
@@ -299,14 +299,14 @@ public class DSPToCDM
         case Int64:
         case UInt64:
         default:
-            throw new DapException("Illegal DapEnum basetype");
+            throw new DapException("Illegal DapEnumeration basetype");
         }
 
         Map<Integer, String> map = new HashMap<Integer, String>();
         List<String> ecnames = dapenum.getNames();
         for(String ecname : ecnames) {
-            Long value = dapenum.lookup(ecname);
-            map.put(value.intValue(), ecname);
+            DapEnumConst value = dapenum.lookup(ecname);
+            map.put(value.getIntValue(), ecname);
         }
 
         EnumTypedef cdmenum = new EnumTypedef(dapenum.getShortName(),
@@ -342,10 +342,10 @@ public class DSPToCDM
                 throw new ForbiddenConversionException("Illegal attribute type:" + basetype.toString());
             DapType uptype = Convert.upcastType(basetype);
             DataType cdmtype =  CDMUtil.daptype2cdmtype(uptype);
-            List<Object> dapvalues = dapattr.getValues();
+            Object[] dapvalues = dapattr.getValues();
             List cdmvalues = new ArrayList();
-            for(int i = 0;i < dapvalues.size();i++) {
-                Object o = dapvalues.get(i);
+            for(int i = 0;i < dapvalues.length;i++) {
+                Object o = dapvalues[i];
                 o = Convert.upcast(o, uptype);
                 if(cdmtype == DataType.CHAR)
                     o = ((Character) o).toString();

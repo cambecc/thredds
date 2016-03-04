@@ -135,7 +135,7 @@ public class DapSerializer
                 if(slices == null)
                     throw new DataException("Unknown variable: " + dapvar.getFQN());
                 long count = DapUtil.sliceProduct(slices);
-                Object vector = Dap4Util.createVector(basetype.getPrimitiveType(), count);
+                Object vector = Dap4Util.createVector(basetype.getAtomicType(), count);
                 dav.read(slices,vector,0);
                 dst.writeArray(basetype, vector);
             }
@@ -149,7 +149,7 @@ public class DapSerializer
     buildAtomicArray(int product, DapType typ)
     {
         Object array = null;
-        AtomicType atype = typ.getAtomicType();
+        TypeSort atype = typ.getTypeSort();
         switch (atype) {
         case Char:
         case Int8:

@@ -4,16 +4,11 @@
 
 package dap4.cdm;
 
-import dap4.core.data.DataException;
 import dap4.core.dmr.*;
-import dap4.core.util.*;
 import dap4.dap4shared.*;
 import ucar.ma2.*;
-import ucar.nc2.Dimension;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -174,6 +169,7 @@ public class CDMArraySequence extends ArraySequence implements CDMArray
 
     //////////////////////////////////////////////////
     // CDMArray Interface
+
     @Override
     public DSP getDSP()
     {
@@ -181,16 +177,16 @@ public class CDMArraySequence extends ArraySequence implements CDMArray
     }
 
     @Override
-    public AtomicType getPrimitiveType()
+    public TypeSort getPrimitiveType()
     {
-        return AtomicType.Sequence;
+        return TypeSort.Seq;
     }
 
     @Override
     public DapType
     getBaseType()
     {
-        return DapType.SEQ;
+        return DapType.SEQUENCE;
     }
 
     @Override

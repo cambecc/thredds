@@ -10,7 +10,6 @@ import dap4.dap4shared.*;
 import ucar.ma2.*;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * CDMArrayAtomic wraps a D4DataAtomic object to present
@@ -33,7 +32,7 @@ public class CDMArrayAtomic extends Array implements CDMArray
     protected DapVariable template = null;
     protected long bytesize = 0;
     protected DapType basetype = null;
-    protected AtomicType primitivetype = null;
+    protected TypeSort primitivetype = null;
 
     protected D4DataAtomic d4data = null;
     protected int elementsize = 0;    // of one element
@@ -69,7 +68,7 @@ public class CDMArrayAtomic extends Array implements CDMArray
         this.d4data = d4data;
         this.template = (DapVariable) d4data.getTemplate();
         this.basetype = this.template.getBaseType();
-        this.primitivetype = this.basetype.getPrimitiveType();
+        this.primitivetype = this.basetype.getAtomicType();
 
         this.isbytestring = (primitivetype.isStringType() || primitivetype.isOpaqueType());
         this.dimsize = DapUtil.dimProduct(this.template.getDimensions());
@@ -112,7 +111,7 @@ public class CDMArrayAtomic extends Array implements CDMArray
     }
 
     @Override
-    public AtomicType getPrimitiveType()
+    public TypeSort getPrimitiveType()
     {
         return this.primitivetype;
     }
@@ -507,8 +506,8 @@ public class CDMArrayAtomic extends Array implements CDMArray
     getArray(DapType dsttype, int dimsize)
         throws DataException
     {
-        AtomicType srctype = this.basetype.getPrimitiveType();
-        AtomicType dstatomtype = dsttype.getPrimitiveType();
+        TypeSort srctype = this.basetype.getPrimitiveType();
+        TypeSort dstatomtype = dsttype.getPrimitiveType();
         Object array =
             Dap4Util.extractVector(this.d4data, 0, dimsize);
         if(dstatomtype != srctype) {

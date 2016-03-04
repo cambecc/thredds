@@ -22,7 +22,7 @@ public class DapGroup extends DapNode implements DapDecl
 
     protected List<DapNode> decls = new ArrayList<DapNode>();
     protected List<DapGroup> groups = new ArrayList<DapGroup>();
-    protected List<DapEnum> enums = new ArrayList<DapEnum>();
+    protected List<DapEnumeration> enums = new ArrayList<DapEnumeration>();
     protected List<DapDimension> dimensions = new ArrayList<DapDimension>();
     protected List<DapVariable> variables = new ArrayList<DapVariable>();
 
@@ -100,7 +100,7 @@ public class DapGroup extends DapNode implements DapDecl
             dimensions.add((DapDimension) newdecl);
             break;
         case ENUMERATION:
-            enums.add((DapEnum) newdecl);
+            enums.add((DapEnumeration) newdecl);
             break;
         case ATOMICVARIABLE:
         case STRUCTURE:
@@ -138,7 +138,7 @@ public class DapGroup extends DapNode implements DapDecl
         return groups;
     }
 
-    public List<DapEnum> getEnums()
+    public List<DapEnumeration> getEnums()
     {
         return enums;
     }
@@ -198,7 +198,7 @@ public class DapGroup extends DapNode implements DapDecl
                 break;
 
             case ENUMERATION:
-                for(DapEnum x : enums) {
+                for(DapEnumeration x : enums) {
                     if(x.getShortName().equals(name))
                         matches.add(x);
                 }

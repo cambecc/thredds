@@ -24,7 +24,6 @@ public class DapStructure extends DapVariable
     public DapStructure()
     {
         super();
-	    this.setBaseType(DapType.STRUCT);
     }
 
     public DapStructure(String name)

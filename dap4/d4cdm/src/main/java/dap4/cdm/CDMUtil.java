@@ -5,10 +5,10 @@
 package dap4.cdm;
 
 import dap4.core.data.DataException;
-import dap4.core.dmr.AtomicType;
 import dap4.core.dmr.DapDimension;
-import dap4.core.dmr.DapEnum;
+import dap4.core.dmr.DapEnumeration;
 import dap4.core.dmr.DapType;
+import dap4.core.dmr.TypeSort;
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
 import dap4.core.util.Slice;
@@ -244,7 +244,7 @@ abstract public class CDMUtil
     static public DataType
     enumtypefor(DapType dt)
     {
-        switch (dt.getAtomicType()) {
+        switch (dt.getTypeSort()) {
         case Char:
         case Int8:
         case UInt8:
@@ -257,7 +257,7 @@ abstract public class CDMUtil
             return DataType.ENUM4;
         case Enum:
             //Coverity[FB.BC_UNCONFIRMED_CAST]
-            return enumtypefor(((DapEnum) dt).getBaseType());
+            return enumtypefor(((DapEnumeration) dt).getBaseType());
         default:
             break;
         }
@@ -316,7 +316,7 @@ abstract public class CDMUtil
     static public DataType
     daptype2cdmtype(DapType daptype)
     {
-        AtomicType atomtype = daptype.getPrimitiveType();
+        TypeSort atomtype = daptype.getAtomicType();
         switch (atomtype) {
         case Char:
             return DataType.CHAR;
@@ -347,8 +347,8 @@ abstract public class CDMUtil
             return DataType.OPAQUE;
         case Enum:
             //Coverity[FB.BC_UNCONFIRMED_CAST]
-            DapEnum dapenum = (DapEnum) daptype;
-            switch (dapenum.getBaseType().getAtomicType()) {
+            DapEnumeration dapenum = (DapEnumeration) daptype;
+            switch (dapenum.getBaseType().getTypeSort()) {
             case Char:
             case UInt8:
             case Int8:
@@ -367,8 +367,10 @@ abstract public class CDMUtil
                 break;
             }
             break;
-        case Structure:
+        case Struct:
             return DataType.STRUCTURE;
+        case Seq:
+            return DataType.SEQUENCE;
         default:
             break;
         }
@@ -384,7 +386,7 @@ abstract public class CDMUtil
      * @return the size, in databuffer
      */
     static public int
-    daptypeSize(AtomicType atomtype)
+    daptypeSize(TypeSort atomtype)
     {
         switch (atomtype) {
         case Char: // remember serial size is 1, not 2.
@@ -482,7 +484,7 @@ abstract public class CDMUtil
         case ATOMICVARIABLE:
 	        // This does not work for String or Opaque.
             DapType dt = ((DapAtomicVariable) var).getBaseType();
-            elementsize =  CDMUtil.daptypeSize(dt.getAtomicType());
+            elementsize =  CDMUtil.daptypeSize(dt.getTypeSort());
             break;
         case STRUCTURE:
         case SEQUENCE:
@@ -512,7 +514,7 @@ abstract public class CDMUtil
      */
 
     static Object
-    extractObject(AtomicType atomtype, D4DataAtomic dataset, long index)
+    extractObject(TypeSort atomtype, D4DataAtomic dataset, long index)
             throws DataException
     {
         try {
@@ -536,7 +538,7 @@ abstract public class CDMUtil
      */
 
     static public long
-    extractLongValue(AtomicType atomtype, D4DataAtomic dataset, long index)
+    extractLongValue(TypeSort atomtype, D4DataAtomic dataset, long index)
             throws DataException
     {
         Object result;
@@ -598,7 +600,7 @@ abstract public class CDMUtil
      */
 
     static public double
-    extractDoubleValue(AtomicType atomtype, D4DataAtomic dataset, int index)
+    extractDoubleValue(TypeSort atomtype, D4DataAtomic dataset, int index)
             throws DataException
     {
         Object result;
@@ -611,9 +613,9 @@ abstract public class CDMUtil
         if(atomtype.isIntegerType() || atomtype.isEnumType()) {
             long lvalue = extractLongValue(atomtype, dataset, index);
             dvalue = (double) lvalue;
-        } else if(atomtype == AtomicType.Float32) {
+        } else if(atomtype == TypeSort.Float32) {
             dvalue = (double) ((Float) result).floatValue();
-        } else if(atomtype == AtomicType.Float64) {
+        } else if(atomtype == TypeSort.Float64) {
             dvalue = ((Double) result).doubleValue();
         } else
             throw new ForbiddenConversionException();
@@ -659,14 +661,14 @@ abstract public class CDMUtil
     {
         int i;
 
-        AtomicType srcatomtype = srctype.getPrimitiveType();
-        AtomicType dstatomtype = dsttype.getPrimitiveType();
+        TypeSort srcatomtype = srctype.getAtomicType();
+        TypeSort dstatomtype = dsttype.getAtomicType();
 
         if(srcatomtype == dstatomtype) {
             return src;
         }
         if(srcatomtype.isIntegerType()
-                && AtomicType.getSignedVersion(srcatomtype) == AtomicType.getSignedVersion(dstatomtype))
+                && TypeSort.getSignedVersion(srcatomtype) == TypeSort.getSignedVersion(dstatomtype))
             return src;
 
         Object result = null;
@@ -1319,7 +1321,7 @@ abstract public class CDMUtil
      * section.  For now, we create a simple array of the relevant
      * type and fill it by extracting the values specified by the
      * section.
-     * <p/>
+     * <p>
      * param array   the array from which the section is extracted
      * param section determines what to extract
      * throws DapException
@@ -1374,7 +1376,7 @@ abstract public class CDMUtil
         }
     }*/
     static public Object
-    createVector(AtomicType atype, long count)
+    createVector(TypeSort atype, long count)
     {
         int icount = (int) count;
         Object vector = null;
@@ -1431,8 +1433,8 @@ abstract public class CDMUtil
 
     /**
      * Convert a Section + variable to a constraint
-     * <p/>
-     * <p/>
+     * <p>
+     * <p>
      * static public View
      * sectionToView(CDMDSP dsp, Variable v, Section section)
      * throws DapException

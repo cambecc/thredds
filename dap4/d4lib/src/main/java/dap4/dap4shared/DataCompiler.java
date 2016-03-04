@@ -274,7 +274,7 @@ public class DataCompiler
     static protected int
     computeTypeSize(DapType daptype)
     {
-        AtomicType atype = daptype.getPrimitiveType();
+        TypeSort atype = daptype.getAtomicType();
         return Dap4Util.daptypeSize(atype);
     }
 

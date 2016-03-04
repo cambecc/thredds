@@ -84,7 +84,7 @@ public abstract class Convert
     static public DapType
     upcastType(DapType basetype)
     {
-        switch (basetype.getAtomicType()) {
+        switch (basetype.getTypeSort()) {
         case UInt8:
             return DapType.INT16;
         case UInt16:
@@ -110,8 +110,8 @@ public abstract class Convert
     upcast(Object o, DapType srctype)
     {
         Object result = null;
-        AtomicType otype = AtomicType.classToType(o);
-        AtomicType srcatomtype = srctype.getAtomicType();
+        TypeSort otype = TypeSort.classToType(o);
+        TypeSort srcatomtype = srctype.getTypeSort();
         if(otype == null)
             throw new ConversionException("Unexpected value type: " + o.getClass());
         switch (srcatomtype) {
@@ -130,8 +130,6 @@ public abstract class Convert
             lvalue &= 0xFFFFFFFFL;
             result = new Long(lvalue);
             break;
-        case Structure:
-            throw new ConversionException("Cannot convert struct");// illegal
         default:
             result = o;
             break;
@@ -142,12 +140,12 @@ public abstract class Convert
 
     static public int getJavaSize(DapType daptype)
     {
-        AtomicType atomictype = daptype.getPrimitiveType();
+        TypeSort atomictype = daptype.getAtomicType();
         return getJavaSize(atomictype);
     }
 
     /* Get the size of an equivalent java object; zero if not defined */
-    static public int getJavaSize(AtomicType atomtype)
+    static public int getJavaSize(TypeSort atomtype)
     {
         switch (atomtype) {
         case Char:
@@ -211,11 +209,11 @@ public abstract class Convert
         if(dsttype == srctype)
             return value;
 
-        AtomicType srcatomtype = srctype.getAtomicType();
-        AtomicType dstatomtype = dsttype.getAtomicType();
+        TypeSort srcatomtype = srctype.getTypeSort();
+        TypeSort dstatomtype = dsttype.getTypeSort();
 
         if(srcatomtype.isEnumType())
-            return convert(dsttype, ((DapEnum) srctype).getBaseType(), value);
+            return convert(dsttype, ((DapEnumeration) srctype).getBaseType(), value);
         assert (!srcatomtype.isEnumType());
 
         // presage
@@ -307,13 +305,13 @@ public abstract class Convert
 
         case String:
         case URL:
-            if(srcatomtype == AtomicType.Opaque) {
+            if(srcatomtype == TypeSort.Opaque) {
             } else
                 result = value.toString();
             break;
 
         case Opaque:
-            if(srcatomtype != AtomicType.Opaque) {
+            if(srcatomtype != TypeSort.Opaque) {
                 fail = true;
                 break;
             }
@@ -327,7 +325,7 @@ public abstract class Convert
             }
             // Check that the src value matches one of the dst enum consts
             //Coverity[FB.BC_UNCONFIRMED_CAST]
-            DapEnum en = (DapEnum) dsttype;
+            DapEnumeration en = (DapEnumeration) dsttype;
             if(en.lookup(lvalue) == null)
                 throw new ConversionException("Enum constant failure");
             result = Long.valueOf(lvalue);
@@ -360,11 +358,11 @@ public abstract class Convert
     static public long
     longValue(DapType srctype, Object value)
     {
-        AtomicType srcatomtype = srctype.getAtomicType();
+        TypeSort srcatomtype = srctype.getTypeSort();
 
         if(srcatomtype.isEnumType())
             //Coverity[FB.BC_UNCONFIRMED_CAST]
-            return longValue(((DapEnum) srctype).getBaseType(), value);
+            return longValue(((DapEnumeration) srctype).getBaseType(), value);
         assert (!srctype.isEnumType());
         if(srcatomtype.isCharType())
             //Coverity[FB.BC_UNCONFIRMED_CAST]
@@ -372,10 +370,10 @@ public abstract class Convert
         else if(srcatomtype.isIntegerType())
             //Coverity[FB.BC_UNCONFIRMED_CAST]
             return ((Number) value).longValue();
-        else if(srcatomtype == AtomicType.Float32)
+        else if(srcatomtype == TypeSort.Float32)
             //Coverity[FB.BC_UNCONFIRMED_CAST]
             return ((Float) value).longValue();
-        else if(srcatomtype == AtomicType.Float64)
+        else if(srcatomtype == TypeSort.Float64)
             //Coverity[FB.BC_UNCONFIRMED_CAST]
             return ((Double) value).longValue();
         else
@@ -399,25 +397,25 @@ public abstract class Convert
     static public double
     doubleValue(DapType srctype, Object value)
     {
-        AtomicType srcatomtype = srctype.getAtomicType();
+        TypeSort srcatomtype = srctype.getTypeSort();
 
         if(srcatomtype.isEnumType())
             //Coverity[FB.BC_UNCONFIRMED_CAST]
-            return doubleValue(((DapEnum) srctype).getBaseType(), value);
+            return doubleValue(((DapEnumeration) srctype).getBaseType(), value);
         assert (!srcatomtype.isEnumType());
 
         double dvalue = 0;
-        if(srcatomtype == AtomicType.UInt64) {
+        if(srcatomtype == TypeSort.UInt64) {
             BigInteger bi = toBigInteger(((Long) value));
             BigDecimal bd = new BigDecimal(bi);
             dvalue = bd.doubleValue();
         } else if(srcatomtype.isIntegerType() || srcatomtype.isCharType()) {
             long lvalue = longValue(srctype, value);
             dvalue = (double) lvalue;
-        } else if(srcatomtype == AtomicType.Float32) {
+        } else if(srcatomtype == TypeSort.Float32) {
             float f = (Float) value;
             dvalue = (double) f;
-        } else if(srcatomtype == AtomicType.Float64)
+        } else if(srcatomtype == TypeSort.Float64)
             dvalue = (Double) value;
         else
             throw new ConversionException(
@@ -456,7 +454,7 @@ public abstract class Convert
      * @return forced value
      * @throws ConversionException if forcing is not possible
      */
-    static public long forceRange(AtomicType basetype, long value)
+    static public long forceRange(TypeSort basetype, long value)
     {
         assert basetype.isIntegerType() : "Internal error";
         switch (basetype) {
@@ -498,11 +496,11 @@ public abstract class Convert
      * @throws DapException if forcing is not possible
      */
     static public double
-    forceRange(AtomicType basetype, double value)
+    forceRange(TypeSort basetype, double value)
         throws DapException
     {
         assert basetype.isFloatType() : "Internal error";
-        if(basetype == AtomicType.Float32) {
+        if(basetype == TypeSort.Float32) {
             float fvalue = (float) value;
             value = (double) fvalue;
         }
@@ -524,7 +522,7 @@ public abstract class Convert
     {
         if(value == null) return value;
         assert (dsttype != null);
-        AtomicType atomtype = dsttype.getAtomicType();
+        TypeSort atomtype = dsttype.getTypeSort();
         long lvalue = 0;
         if(atomtype.isIntegerType() || atomtype.isCharType()) {
             BigInteger bi = BigInteger.ZERO;
@@ -567,7 +565,7 @@ public abstract class Convert
                 assert false;
             }
         } else if(atomtype.isStringType()) {
-            if(atomtype == AtomicType.URL) {
+            if(atomtype == TypeSort.URL) {
                 // See if this parses as a URL/URI
                 value = value.trim();
                 try {
@@ -604,10 +602,10 @@ public abstract class Convert
             // an enum constant name to look for.
             String name = value.trim();
             //Coverity[FB.BC_UNCONFIRMED_CAST]
-            Long Lvalue = ((DapEnum) dsttype).lookup(name);
-            if(Lvalue == null)
+            DapEnumConst econst = ((DapEnumeration) dsttype).lookup(name);
+            if(econst == null)
                 throw new ConversionException("Illegal enum constant value: " + name);
-            return Lvalue;
+            return econst.getValue();
         }
         throw new ConversionException("Internal error");
     }
@@ -625,14 +623,14 @@ public abstract class Convert
     toString(Object value, DapType srctype)
     {
         StringBuilder buf = new StringBuilder();
-        AtomicType srcatomtype;
+        TypeSort srcatomtype;
         boolean charornum;
         boolean fail = false;
         long lvalue = 0;
 
         assert (srctype != null) : "Internal error";
 
-        srcatomtype = srctype.getAtomicType();
+        srcatomtype = srctype.getTypeSort();
 
         // Do some preliminary conversions
         charornum = true;
@@ -640,7 +638,7 @@ public abstract class Convert
             lvalue = ((Character) value).charValue();
         else if(srcatomtype.isNumericType())
             lvalue = ((Number) value).longValue();
-        else if(srcatomtype == AtomicType.UInt64)
+        else if(srcatomtype == TypeSort.UInt64)
             lvalue = ((BigInteger) value).longValue();
         else
             charornum = false;
@@ -708,9 +706,10 @@ public abstract class Convert
             break;
         case Enum:
             //Coverity[FB.BC_UNCONFIRMED_CAST]
-            DapEnum en = (DapEnum) srctype;
-            String name = en.lookup(lvalue);
-            if(name == null) name = "?";
+            DapEnumeration en = (DapEnumeration) srctype;
+            DapEnumConst econst = en.lookup(lvalue);
+            String name = econst.getShortName();
+            if(econst == null) name = "?";
             buf.append(en.getFQN() + "." + name);
             break;
         default:

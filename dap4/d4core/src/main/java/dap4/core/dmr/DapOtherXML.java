@@ -29,7 +29,7 @@ public class DapOtherXML extends DapAttribute
 
     public DapOtherXML(String name)
     {
-        super(name);
+        super(name,null);
     }
 
     //////////////////////////////////////////////////

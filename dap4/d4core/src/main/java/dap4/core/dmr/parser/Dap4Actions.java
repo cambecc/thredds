@@ -59,22 +59,16 @@ abstract public class Dap4Actions extends Dap4EventHandler
 
 
     //////////////////////////////////////////////////
+    // Instance variables
+
+    protected DapFactory factory = null;
+
+    //////////////////////////////////////////////////
     // Constructor(s)
 
     public Dap4Actions()
     {
     }
-
-    ///////////////////////////////////////////////////
-    // Node creation
-
-    DapNode newNode(DapSort sort)
-        throws ParseException
-    {
-        return newNode(null, sort);
-    }
-
-    abstract DapNode newNode(String name, DapSort sort) throws ParseException;
 
     ///////////////////////////////////////////////////
     // Non-abstract parser actions
@@ -118,8 +112,7 @@ abstract public class Dap4Actions extends Dap4EventHandler
     createxmltext(String text)
         throws DapException
     {
-        DapXML node = (DapXML) newNode(null, DapSort.XML);
-        node.setNodeType(DapXML.NodeType.TEXT);
+        DapXML node = factory.newXML(DapXML.NodeType.TEXT,null);
         node.setText(text);
         return node;
     }
@@ -129,8 +122,7 @@ abstract public class Dap4Actions extends Dap4EventHandler
         throws DapException
     {
         assert(parent != null);
-        DapXML node = (DapXML) newNode(open.name, DapSort.XML);
-        node.setNodeType(DapXML.NodeType.ELEMENT);
+        DapXML node = factory.newXML(DapXML.NodeType.ELEMENT,open.name);
         if(parent.getSort() == DapSort.OTHERXML) {
             DapOtherXML aparent = (DapOtherXML) parent;
             aparent.setRoot(node);
@@ -142,8 +134,7 @@ abstract public class Dap4Actions extends Dap4EventHandler
             throw new DapException("XMLElement: unknown parent type");
         for(Map.Entry<String,SaxEvent> entry : map.entrySet()) {
             SaxEvent att = entry.getValue();
-            DapXML a = (DapXML) newNode(att.name, DapSort.XML);
-            a.setNodeType(DapXML.NodeType.ATTRIBUTE);
+            DapXML a = factory.newXML(DapXML.NodeType.ATTRIBUTE,att.name);
             a.addXMLAttribute(a);
         }
         return node;

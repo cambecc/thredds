@@ -67,7 +67,7 @@ public class Universal extends CEConstraint
             List<Slice> slices = DapUtil.dimsetSlices(var.getDimensions());
             super.addVariable(var, slices);
         }
-        super.enums = new ArrayList<DapEnum>();
+        super.enums = new ArrayList<DapEnumeration>();
         super.enums.addAll(dmr.getEnums());
         super.dimrefs = new ArrayList<DapDimension>();
         super.dimrefs.addAll(dmr.getDimensions());
@@ -85,7 +85,6 @@ public class Universal extends CEConstraint
         case DIMENSION:
         case ENUMERATION:
         case ATOMICVARIABLE:
-        case GRID:
         case SEQUENCE:
         case STRUCTURE:
         case GROUP:

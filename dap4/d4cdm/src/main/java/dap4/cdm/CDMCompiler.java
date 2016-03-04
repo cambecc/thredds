@@ -323,10 +323,10 @@ public class CDMCompiler
 /*    static int
     computeTypeSize(DapType daptype)
     {
-        AtomicType atype = daptype.getAtomicType();
-        if(atype == AtomicType.Enum) {
-            DapEnum dapenum = (DapEnum) daptype;
-            atype = dapenum.getBaseType().getAtomicType();
+        TypeSort atype = daptype.getTypeSort();
+        if(atype == TypeSort.Enum) {
+            DapEnumeration dapenum = (DapEnumeration) daptype;
+            atype = dapenum.getBaseType().getTypeSort();
         }
         return Dap4Util.daptypeSize(atype);
     }

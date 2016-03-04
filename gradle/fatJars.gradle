@@ -28,7 +28,7 @@ dependencies {
 
     toolsUI project(':ui')
 
-    dap4lib project(':dap4:d4shared')
+    dap4lib project(':dap4:d4lib')
     dap4lib libraries["slf4j-jdk14"]
     d4ts project(':dap4:d4ts')
 }
@@ -96,7 +96,7 @@ fatJarTasks << tasks.create(name: 'buildDap4Lib', type: ShadowJar) {
     baseName = 'dap4lib'
 //    configurations = [project.configurations.dap4shared]
     doFirst {
-        manifest.attributes project(':dap4:d4shared').tasks.jar.manifest.attributes
+        manifest.attributes project(':dap4:d4lib').tasks.jar.manifest.attributes
     }
 }
 

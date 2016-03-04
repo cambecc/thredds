@@ -6,7 +6,7 @@ package dap4.cdm;
 
 import dap4.core.data.DataAtomic;
 import dap4.core.data.DataException;
-import dap4.core.dmr.AtomicType;
+import dap4.core.dmr.TypeSort;
 import dap4.core.dmr.DapAtomicVariable;
 import dap4.core.dmr.DapType;
 import dap4.core.dmr.DapVariable;
@@ -31,7 +31,7 @@ public class CDMDataAtomic extends AbstractDataVariable
     protected long product = 0; // dimension cross product; 0 => undefined; scalar=>1
 
     protected DapType basetype = null;
-    protected AtomicType atomtype = null;
+    protected TypeSort atomtype = null;
 
     protected Array data = null;
 
@@ -43,7 +43,7 @@ public class CDMDataAtomic extends AbstractDataVariable
     {
         super(template);
         this.basetype = ((DapVariable) template).getBaseType();
-        this.atomtype = this.basetype.getPrimitiveType();
+        this.atomtype = this.basetype.getAtomicType();
         this.product = DapUtil.dimProduct(template.getDimensions());
         this.dsp = dsp;
         this.data = array;

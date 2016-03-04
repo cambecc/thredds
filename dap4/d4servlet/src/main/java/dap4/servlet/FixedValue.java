@@ -5,7 +5,7 @@
 
 package dap4.servlet;
 
-import dap4.core.dmr.AtomicType;
+import dap4.core.dmr.TypeSort;
 import dap4.core.dmr.DapType;
 import dap4.core.util.DapException;
 import dap4.dap4shared.Dap4Util;
@@ -62,7 +62,7 @@ public class FixedValue extends Value
     nextValue(DapType basetype)
         throws DapException
     {
-        AtomicType atomtype = basetype.getAtomicType();
+        TypeSort atomtype = basetype.getTypeSort();
         switch (atomtype) {
         case Int8:
         case UInt8:

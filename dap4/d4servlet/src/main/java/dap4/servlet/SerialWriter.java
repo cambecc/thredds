@@ -12,8 +12,6 @@ import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
-import java.util.Arrays;
 
 /**
  * The SerialWriter class
@@ -126,8 +124,8 @@ public class SerialWriter
     encodeObject(DapType vtype, Object value, ByteOrder order)
             throws IOException
     {
-        AtomicType atomtype = vtype.getPrimitiveType();
-        int total = (int) AtomicType.getSize(atomtype);
+        TypeSort atomtype = vtype.getAtomicType();
+        int total = (int) TypeSort.getSize(atomtype);
         ByteBuffer buf = ByteBuffer.allocate(total).order(order);
         switch (atomtype) {
         case Char:
@@ -202,9 +200,9 @@ public class SerialWriter
     encodeArray(DapType vtype, Object values)
             throws IOException
     {
-        AtomicType atomtype = vtype.getPrimitiveType();
+        TypeSort atomtype = vtype.getAtomicType();
         int count = Array.getLength(values);
-        int total = (int) AtomicType.getSize(atomtype) * count;
+        int total = (int) TypeSort.getSize(atomtype) * count;
         ByteBuffer buf = ByteBuffer.allocate(total).order(order);
         switch (atomtype) {
         case Char:

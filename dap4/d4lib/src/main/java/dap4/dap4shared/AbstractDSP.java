@@ -8,8 +8,8 @@ import dap4.core.data.DataDataset;
 import dap4.core.data.DataException;
 import dap4.core.dmr.DapAttribute;
 import dap4.core.dmr.DapDataset;
-import dap4.core.dmr.DapFactoryDMR;
 import dap4.core.dmr.DapNode;
+import dap4.core.dmr.DefaultFactory;
 import dap4.core.dmr.parser.Dap4Parser;
 import dap4.core.util.*;
 import org.xml.sax.SAXException;
@@ -123,7 +123,7 @@ abstract public class AbstractDSP implements DSP
             throws DapException
     {
         // Parse the dmr
-        Dap4Parser pushparser = new Dap4Parser(new DapFactoryDMR());
+        Dap4Parser pushparser = new Dap4Parser(new DefaultFactory());
         if(PARSEDEBUG)
             pushparser.setDebugLevel(1);
         try {
@@ -152,7 +152,6 @@ abstract public class AbstractDSP implements DSP
         List<DapNode> nodes = dataset.getNodeList();
         for(DapNode node : nodes) {
             switch (node.getSort()) {
-            case GRID:
             case SEQUENCE:
             case STRUCTURE:
             case GROUP:

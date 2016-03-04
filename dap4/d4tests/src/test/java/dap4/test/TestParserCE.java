@@ -9,7 +9,7 @@ import dap4.ce.CEConstraint;
 import dap4.ce.CECompiler;
 import dap4.ce.parser.CEParser;
 import dap4.core.dmr.DapDataset;
-import dap4.core.dmr.DapFactoryDMR;
+import dap4.core.dmr.DefaultFactory;
 import dap4.core.dmr.parser.Dap4Parser;
 import org.junit.Assert;
 import org.junit.Before;
@@ -157,7 +157,7 @@ public class TestParserCE extends DapTestCommon
 
         // Create the DMR tree
         System.out.println("Parsing DMR");
-        Dap4Parser pushparser = new Dap4Parser(new DapFactoryDMR());
+        Dap4Parser pushparser = new Dap4Parser(new DefaultFactory());
         if(DMRPARSEDEBUG)
             pushparser.setDebugLevel(1);
         boolean parseok = pushparser.parse(testset.dmr);

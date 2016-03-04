@@ -9,8 +9,6 @@ import dap4.core.dmr.*;
 import dap4.core.util.*;
 
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.CharsetDecoder;
 import java.util.List;
 
 public class D4DataAtomic extends D4DataVariable implements DataAtomic
@@ -20,7 +18,7 @@ public class D4DataAtomic extends D4DataVariable implements DataAtomic
 
     protected long product = 0; // dimension cross product; 0 => undefined
     protected DapType basetype = null;
-    protected AtomicType atomictype = null;
+    protected TypeSort atomictype = null;
     protected boolean isscalar = false;
     protected long varoffset = -1; // absolute offset of the start in bytebyffer.
     protected long varelementsize = 0;
@@ -42,9 +40,9 @@ public class D4DataAtomic extends D4DataVariable implements DataAtomic
         this.dsp = dsp;
         this.varoffset = offset;
         this.basetype = dap.getBaseType();
-        this.atomictype = this.basetype.getPrimitiveType();
+        this.atomictype = this.basetype.getAtomicType();
         this.product = DapUtil.dimProduct(dap.getDimensions());
-        this.varelementsize = Dap4Util.daptypeSize(this.basetype.getPrimitiveType());
+        this.varelementsize = Dap4Util.daptypeSize(this.basetype.getAtomicType());
         this.isbytestring = (this.atomictype.isStringType() || this.atomictype.isOpaqueType());
     }
 
@@ -166,7 +164,7 @@ public class D4DataAtomic extends D4DataVariable implements DataAtomic
     {
         Object result = null;
         long lvalue = 0;
-        AtomicType atomtype = basetype.getPrimitiveType();
+        TypeSort atomtype = basetype.getAtomicType();
         setup(index);
         switch (atomtype) {
         case Char:
@@ -211,7 +209,7 @@ public class D4DataAtomic extends D4DataVariable implements DataAtomic
             break;
         case Enum:
             // recast as enum's basetype
-            result = extractObject(((DapEnum) basetype).getBaseType(), dataset, index);
+            result = extractObject(((DapEnumeration) basetype).getBaseType(), dataset, index);
             break;
         }
         return result;
@@ -235,7 +233,7 @@ public class D4DataAtomic extends D4DataVariable implements DataAtomic
     {
         int ioffset = (int) offset;
         long position = dataset.position();
-        AtomicType atomtype = basetype.getPrimitiveType();
+        TypeSort atomtype = basetype.getAtomicType();
         setup(start);
         //long elemsize = AtomicType.getSize(atomtype);
         long elemsize = this.varelementsize;
@@ -316,7 +314,7 @@ public class D4DataAtomic extends D4DataVariable implements DataAtomic
             break;
         case Enum:
             // recast as enum's basetype
-            extractObjectVector(((DapEnum) basetype).getBaseType(), dataset, start, count, vector, offset);
+            extractObjectVector(((DapEnumeration) basetype).getBaseType(), dataset, start, count, vector, offset);
             break;
         }
         // If this is a fixed size type (with exceptions),

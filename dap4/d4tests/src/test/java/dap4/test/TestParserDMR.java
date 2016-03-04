@@ -185,7 +185,7 @@ public class TestParserDMR extends DapTestCommon
         document = readfile(testinput);
 
         // 1. push parser
-        Dap4Parser pushparser = new Dap4Parser(new DapFactoryDMR());
+        Dap4Parser pushparser = new Dap4Parser(new DefaultFactory());
         if (PARSEDEBUG || debug)
             pushparser.setDebugLevel(1);
 

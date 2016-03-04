@@ -129,13 +129,6 @@ abstract public class DapUtil // Should only contain static methods
             }
             break;
 
-        // Following can never have/be sequence
-        case GRID:
-        case ENUMERATION:
-        case ATTRIBUTE:
-        case DIMENSION:
-        case ATOMICVARIABLE:
-        case XML:
         default: /* ignore */
             break;
         }
@@ -269,7 +262,6 @@ abstract public class DapUtil // Should only contain static methods
 
         case STRUCTURE:
         case SEQUENCE:
-        case GRID:
             for(DapVariable field : ((DapStructure) var).getFields()) {
                 if(!checkFixedSize(field)) return false;
             }
