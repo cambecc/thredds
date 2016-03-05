@@ -31,8 +31,7 @@ public class CDMArrayAtomic extends Array implements CDMArray
     protected D4DSP dsp = null;
     protected DapVariable template = null;
     protected long bytesize = 0;
-    protected DapType basetype = null;
-    protected TypeSort primitivetype = null;
+    protected TypeSort basetype = null;
 
     protected D4DataAtomic d4data = null;
     protected int elementsize = 0;    // of one element
@@ -105,9 +104,9 @@ public class CDMArrayAtomic extends Array implements CDMArray
     }
 
     @Override
-    public DapType getBaseType()
+    public TypeSort getType()
     {
-        return this.basetype;
+        return TypeSort.Seq;
     }
 
     @Override

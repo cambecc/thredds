@@ -182,12 +182,13 @@ public class CDMArraySequence extends ArraySequence implements CDMArray
         return TypeSort.Seq;
     }
 
+    /*
     @Override
     public DapType
     getBaseType()
     {
         return DapType.SEQUENCE;
-    }
+    }  */
 
     @Override
     public CDMDataset getRoot()

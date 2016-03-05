@@ -8,6 +8,7 @@ import dap4.core.util.DapSort;
 
 import java.util.*;
 
+
 /**
  * This class reifies all of the atomic types
  * and specifically all enumeration declarations
@@ -17,7 +18,6 @@ import java.util.*;
 
 public class DapType extends DapNode implements DapDecl
 {
-
     /**
      * Define instances of DapType for every TypeSort.
      */
@@ -37,8 +37,8 @@ public class DapType extends DapNode implements DapDecl
     static public final DapType URL;
     static public final DapType OPAQUE;
     static public final DapType ENUM;
-    static public final DapType SEQUENCE;
-    static public final DapType STRUCTURE;
+    //static public final DapType SEQUENCE;
+    //static public final DapType STRUCTURE;
 
     /**
      * Define a map from the Atomic Type Sort to the
@@ -72,8 +72,8 @@ public class DapType extends DapNode implements DapDecl
         URL = new DapType(TypeSort.URL);
         OPAQUE = new DapType(TypeSort.Opaque);
         ENUM = new DapType(TypeSort.Enum);
-        STRUCTURE = new DapType(TypeSort.Struct);
-        SEQUENCE = new DapType(TypeSort.Seq);
+        //STRUCTURE = new DapType(TypeSort.Struct);
+        //SEQUENCE = new DapType(TypeSort.Seq);
 
         typemap.put(TypeSort.Char, DapType.CHAR);
         typemap.put(TypeSort.Int8, DapType.INT8);
@@ -89,9 +89,9 @@ public class DapType extends DapNode implements DapDecl
         typemap.put(TypeSort.String, DapType.STRING);
         typemap.put(TypeSort.URL, DapType.URL);
         typemap.put(TypeSort.Opaque, DapType.OPAQUE);
-        typemap.put(TypeSort.Enum, DapType.ENUM);
-        typemap.put(TypeSort.Seq, DapType.SEQUENCE);
-        typemap.put(TypeSort.Struct, DapType.STRUCTURE);
+        //typemap.put(TypeSort.Enum, DapType.ENUM);
+        //typemap.put(TypeSort.Seq, DapType.SEQUENCE);
+        //typemap.put(TypeSort.Struct, DapType.STRUCTURE);
     }
 
     //////////////////////////////////////////////////

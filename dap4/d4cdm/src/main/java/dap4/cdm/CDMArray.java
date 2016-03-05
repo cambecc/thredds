@@ -20,5 +20,5 @@ public interface CDMArray
     public DapVariable getTemplate();
     public long getByteSize();
     public DapType getBaseType();
-    public TypeSort getPrimitiveType();
+    public TypeSort getType();
 }
