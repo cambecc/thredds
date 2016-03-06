@@ -455,6 +455,7 @@ public class Dap4Parser extends Dap4ParserBody
                 String typename = basetype.value;
                 if("Byte".equalsIgnoreCase(typename)) typename = "UInt8";
                 basedaptype = DapType.reify(typename);
+                basedaptype.toString();
                 if(basedaptype == null || !islegalenumtype(basedaptype))
                     throw new ParseException("Enumdef: Invalid Enum Declaration Type name: " + basetype.value);
             }
@@ -726,15 +727,27 @@ public class Dap4Parser extends Dap4ParserBody
     {
         String typename = close.name;
         if("Byte".equals(typename)) typename = "UInt8"; // special case
-        TypeSort atype = TypeSort.getTypeSort(typename);
-        DapVariable var = (DapVariable) searchScope(sort);
-        assert var != null;
-        TypeSort vartype = var.getBaseType().getTypeSort();
-        if(atype == null)
+        switch (sort) {
+        case ATOMICVARIABLE:
+            TypeSort atype = TypeSort.getTypeSort(typename);
+            DapVariable var = (DapVariable) searchScope(sort);
+            assert var != null;
+            TypeSort vartype = var.getBaseType().getTypeSort();
+            if(atype == null)
+                throw new ParseException("Variable: Illegal type: " + typename);
+            if(atype != vartype)
+                throw new ParseException(String.format("variable: open/close type mismatch: <%s> </%s>",
+                        vartype, atype));
+            break;
+        case SEQUENCE:
+        case STRUCTURE:
+            if(!sort.getName().equalsIgnoreCase(typename))
+                throw new ParseException(String.format("variable: open/close type mismatch: <%s> </%s>",
+                        typename, sort.getName()));
+            break;
+        default:
             throw new ParseException("Variable: Illegal type: " + typename);
-        if(atype != vartype)
-            throw new ParseException(String.format("variable: open/close type mismatch: <%s> </%s>",
-                vartype, atype));
+        }
     }
 
     void leavevariable()

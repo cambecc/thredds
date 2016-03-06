@@ -31,7 +31,7 @@ public class CDMArrayAtomic extends Array implements CDMArray
     protected D4DSP dsp = null;
     protected DapVariable template = null;
     protected long bytesize = 0;
-    protected TypeSort basetype = null;
+    protected DapType basetype = null;
 
     protected D4DataAtomic d4data = null;
     protected int elementsize = 0;    // of one element
@@ -67,11 +67,10 @@ public class CDMArrayAtomic extends Array implements CDMArray
         this.d4data = d4data;
         this.template = (DapVariable) d4data.getTemplate();
         this.basetype = this.template.getBaseType();
-        this.primitivetype = this.basetype.getAtomicType();
 
-        this.isbytestring = (primitivetype.isStringType() || primitivetype.isOpaqueType());
+        this.isbytestring = (basetype.isStringType() || basetype.isOpaqueType());
         this.dimsize = DapUtil.dimProduct(this.template.getDimensions());
-        this.elementsize = Dap4Util.daptypeSize(this.primitivetype);
+        this.elementsize = this.basetype.getSize();
 
         this.bytesize = computeTotalSize();
     }
@@ -80,39 +79,34 @@ public class CDMArrayAtomic extends Array implements CDMArray
     // CDMArray Interface
 
     @Override
+    public DapType
+    getBaseType()
+    {
+        return this.basetype;
+    }
+
+    @Override
     public DSP getDSP()
     {
-        return dsp;
+        return this.dsp;
     }
 
     @Override
     public CDMDataset getRoot()
     {
-        return root;
+        return this.root;
     }
 
     @Override
     public DapVariable getTemplate()
     {
-        return template;
+        return this.template;
     }
 
     @Override
     public long getByteSize()
     {
         return bytesize;
-    }
-
-    @Override
-    public TypeSort getType()
-    {
-        return TypeSort.Seq;
-    }
-
-    @Override
-    public TypeSort getPrimitiveType()
-    {
-        return this.primitivetype;
     }
 
     //////////////////////////////////////////////////

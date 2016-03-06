@@ -96,6 +96,8 @@ abstract public class DapNode
             this.sort = DapSort.DIMENSION;
         else if(this instanceof DapEnumeration)
             this.sort = DapSort.ENUMERATION;
+        else if(this instanceof DapType) // must follow enumeration
+            this.sort = DapSort.ATOMICTYPE;
         else if(this instanceof DapEnumConst)
             this.sort = DapSort.ENUMCONST;
         else if(this instanceof DapXML)

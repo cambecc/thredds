@@ -18,6 +18,7 @@ import dap4.core.dmr.*;
  */
 public enum DapSort
 {
+    ATOMICTYPE("AtomicType",DapType.class,null),
     ATTRIBUTESET("AttributeSet", DapAttributeSet.class, null),
     OTHERXML("OtherXML", DapOtherXML.class, null),
     ATTRIBUTE("Attribute", DapAttribute.class, ATTRIBUTESET, OTHERXML),

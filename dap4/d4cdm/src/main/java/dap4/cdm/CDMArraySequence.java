@@ -4,8 +4,13 @@
 
 package dap4.cdm;
 
-import dap4.core.dmr.*;
-import dap4.dap4shared.*;
+import dap4.core.dmr.DapStructure;
+import dap4.core.dmr.DapType;
+import dap4.core.dmr.DapVariable;
+import dap4.core.dmr.TypeSort;
+import dap4.dap4shared.D4DSP;
+import dap4.dap4shared.D4DataSequence;
+import dap4.dap4shared.DSP;
 import ucar.ma2.*;
 
 import java.io.IOException;
@@ -20,11 +25,11 @@ import java.util.List;
  * Sequence S {f1,f2,...fm} [d1][d2]...[dn]
  * Represent it in CDM as this:
  * Structure S {f1,f2,...fm} [d1][d2]...[dn][*]
- * <p/>
+ * <p>
  * With respect to the data, the above is stored
  * as an n-D array of ArrayObject instances where the
  * leaf objects are instances of (CDM)ArraySequence.
- * <p/>
+ * <p>
  * Internally, the sequence stored as a 2-D ragged array
  * CDMArray[][] records.
  * The first dimension has varying lengths representing
@@ -32,7 +37,7 @@ import java.util.List;
  * of a Sequence.
  * The second dimension has size |members| i.e. the number
  * of fields in the sequence.
- * <p/>
+ * <p>
  * We cannot subclass CDMArrayStructure because we need to subclass
  * ArraySequence, so we are forced to duplicate a lot of the CDMArrayStructure
  * code.
@@ -94,6 +99,7 @@ public class CDMArraySequence extends ArraySequence implements CDMArray
     protected D4DSP dsp = null;
     protected DapVariable template = null;
     protected long bytesize = 0;
+    protected DapType basetype = null;
 
     protected D4DataSequence d4data = null;
     protected long nmembers = 0;
@@ -130,6 +136,8 @@ public class CDMArraySequence extends ArraySequence implements CDMArray
         this.d4data = d4data;
         this.nmembers = ((DapStructure) template).getFields().size();
         this.nrecords = d4data.getRecordCount();
+        this.basetype = this.template.getBaseType();
+
 
         // Fill in the instances and structdata vectors
         // The leaf instances arrays will be filled in by the CDM compiler
@@ -171,24 +179,16 @@ public class CDMArraySequence extends ArraySequence implements CDMArray
     // CDMArray Interface
 
     @Override
+    public DapType getBaseType()
+    {
+        return this.basetype;
+    }
+
+    @Override
     public DSP getDSP()
     {
         return this.dsp;
     }
-
-    @Override
-    public TypeSort getPrimitiveType()
-    {
-        return TypeSort.Seq;
-    }
-
-    /*
-    @Override
-    public DapType
-    getBaseType()
-    {
-        return DapType.SEQUENCE;
-    }  */
 
     @Override
     public CDMDataset getRoot()
@@ -278,7 +278,7 @@ public class CDMArraySequence extends ArraySequence implements CDMArray
     @Override
     public StructureData getStructureData(int index)
     {
-        assert(super.sdata != null);
+        assert (super.sdata != null);
         if(index < 0 || index >= this.nrecords)
             throw new IllegalArgumentException(index + " >= " + super.sdata.length);
         assert (super.sdata[index] != null);
@@ -308,7 +308,7 @@ public class CDMArraySequence extends ArraySequence implements CDMArray
      */
     public Array getArray(int recno, StructureMembers.Member m)
     {
-        return (ucar.ma2.Array) memberArray(recno, CDMArrayStructure.memberIndex(m));	
+        return (ucar.ma2.Array) memberArray(recno, CDMArrayStructure.memberIndex(m));
     }
 
     protected CDMArrayAtomic

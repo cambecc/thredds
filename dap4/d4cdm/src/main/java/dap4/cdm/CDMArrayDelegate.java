@@ -68,10 +68,4 @@ class CDMArrayDelegate implements CDMArray
         return this.basetype;
     }
 
-    @Override
-    public TypeSort getPrimitiveType()
-    {
-        return this.primitivetype;
-    }
-
 }

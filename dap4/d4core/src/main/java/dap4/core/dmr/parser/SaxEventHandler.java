@@ -278,6 +278,9 @@ abstract public class SaxEventHandler extends DefaultHandler
             throws SAXException
     {
         try {
+            if(token != null && token.name!= null && token.name.equals("Structure")) {
+                int x = 0;
+            }
             yyevent(token);
         } catch (SAXException se) {
             throw new SAXException(locatedError(se.getMessage()));

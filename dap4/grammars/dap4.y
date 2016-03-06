@@ -98,21 +98,29 @@ response:
 	;
 
 dataset:
-	DATASET_
-	xml_attribute_map
-		{enterdataset($2);}
+	datasetprefix
 	groupbody
 	_DATASET
 		{leavedataset();}
 	;
 
+datasetprefix:
+	DATASET_
+	xml_attribute_map
+		{enterdataset($2);}
+	;
+
 group:
-	GROUP_
-	ATTR_NAME
-		{entergroup($2);}
+	groupprefix
 	groupbody
 	_GROUP
 		{leavegroup();}
+	;
+
+groupprefix:
+	GROUP_
+	ATTR_NAME
+		{entergroup($2);}
 	;
 
 /* The decls are directly inserted into the current group,
@@ -131,12 +139,16 @@ groupbody:
 	;
 
 enumdef:
-	ENUMERATION_
-	xml_attribute_map
-		{enterenumdef($2);}
+	enumdefprefix
 	enumconst_list
 	_ENUMERATION
 		{leaveenumdef();}
+	;
+
+enumdefprefix:
+	ENUMERATION_
+	xml_attribute_map
+		{enterenumdef($2);}
 	;
 
 enumconst_list:
@@ -152,12 +164,16 @@ enumconst:
 	;
 
 dimdef:
-	DIMENSION_
-	xml_attribute_map
-		{enterdimdef($2);}
+	dimdefprefix
 	metadatalist
 	_DIMENSION
 		{leavedimdef();}
+	;
+
+dimdefprefix:
+	DIMENSION_
+	xml_attribute_map
+		{enterdimdef($2);}
 	;
 
 dimref:
@@ -176,23 +192,31 @@ variable:
 
 /* Use atomic type to avoid rule explosion */
 atomicvariable:
-	atomictype_
-	ATTR_NAME
-		{enteratomicvariable($1,$2);}
+	atomicvariableprefix
 	varbody
 	_atomictype
-		{leaveatomicvariable($5);}
+		{leaveatomicvariable($3);}
 
 	;
 
+atomicvariableprefix:
+	atomictype_
+	ATTR_NAME
+		{enteratomicvariable($1,$2);}
+	;
+
 enumvariable:
+	enumvariableprefix
+	varbody
+	_ENUM
+		{leaveenumvariable($3);}
+
+	;
+
+enumvariableprefix:
 	ENUM_
 	xml_attribute_map
 		{enterenumvariable($2);}
-	varbody
-	_ENUM
-		{leaveenumvariable($5);}
-
 	;
 
 /* Does not include enum */
@@ -241,21 +265,29 @@ varbody:
 	;
 
 mapref:
-	MAP_
-	ATTR_NAME
-		{entermap($2);}
+	maprefprefix
 	metadatalist
 	_MAP
 		{leavemap();}
 	;
 
+maprefprefix:
+	MAP_
+	ATTR_NAME
+		{entermap($2);}
+	;
+
 structurevariable:
+	structurevariableprefix
+	structbody
+	_STRUCTURE
+		{leavestructurevariable($3);}
+	;
+
+structurevariableprefix:
 	STRUCTURE_
 	ATTR_NAME
 		{enterstructurevariable($2);}
-	structbody
-	_STRUCTURE
-		{leavestructurevariable($5);}
 	;
 
 structbody:
@@ -267,12 +299,16 @@ structbody:
 	;
 
 sequencevariable:
+	sequencevariableprefix
+	sequencebody
+	_SEQUENCE
+		{leavesequencevariable($3);}
+	;
+
+sequencevariableprefix:
 	SEQUENCE_
 	ATTR_NAME
 		{entersequencevariable($2);}
-	sequencebody
-	_SEQUENCE
-		{leavesequencevariable($5);}
 	;
 
 sequencebody:
@@ -301,20 +337,21 @@ attribute:
 
 /* We have to case this out to avoid empty list followed by empty list */
 atomicattribute:
-	  ATTRIBUTE_
-	  xml_attribute_map
-	  namespace_list
-		{enteratomicattribute($2,$3);}
+	atomicattributeprefix
 	  valuelist
 	  _ATTRIBUTE
 		{leaveatomicattribute();}
 	|
+	atomicattributeprefix
+	  _ATTRIBUTE
+		{leaveatomicattribute();}
+	;
+
+atomicattributeprefix:
 	  ATTRIBUTE_
 	  xml_attribute_map
 	  namespace_list
 		{enteratomicattribute($2,$3);}
-	  _ATTRIBUTE
-		{leaveatomicattribute();}
 	;
 
 namespace_list:
@@ -332,13 +369,17 @@ namespace:
 	;
 
 containerattribute:
+	containerattributeprefix
+	  attributelist
+	  _ATTRIBUTE
+		{leavecontainerattribute();}
+	;
+
+containerattributeprefix:
 	  ATTRIBUTE_
 	  xml_attribute_map
 	  namespace_list
 		{entercontainerattribute($2,$3);}
-	  attributelist
-	  _ATTRIBUTE
-		{leavecontainerattribute();}
 	;
 
 /* Cannot be empty */
@@ -361,12 +402,16 @@ value:
 	;
 
 otherxml:
-	OTHERXML_
-	xml_attribute_map
-		{enterotherxml($2);}
+	otherxmlprefix
 	xml_body
 	_OTHERXML
 		{leaveotherxml();}
+	;
+
+otherxmlprefix:
+	OTHERXML_
+	xml_attribute_map
+		{enterotherxml($2);}
 	;
 
 xml_body:
@@ -375,14 +420,18 @@ xml_body:
 	;
 
 element_or_text:
+	element_or_textprefix
+	  xml_body
+	  xml_close
+		{leavexmlelement($3);}
+	| TEXT
+		{xmltext($1);}
+	;
+
+element_or_textprefix:
 	  xml_open
 	  xml_attribute_map
 		{enterxmlelement($1,$2);}
-	  xml_body
-	  xml_close
-		{leavexmlelement($5);}
-	| TEXT
-		{xmltext($1);}
 	;
 
 /* Use a generic map of xml attributes; action
@@ -482,14 +531,17 @@ xml_close:
 	;
 
 error_response:
+	error_responseprefix
+	error_body
+	_ERROR
+	    {leaveerror();}
+	;
+
+error_responseprefix:
 	ERROR_
 	xml_attribute_map
 	    /* optional attribute name="httpcode" data type="dap4_integer" */
 	    {entererror($2);}
-
-	error_body
-	_ERROR
-	    {leaveerror();}
 	;
 
 error_body:

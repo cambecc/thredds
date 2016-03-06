@@ -37,7 +37,6 @@ public class CDMArrayStructure extends ArrayStructure implements CDMArray
     protected DapVariable template = null;
     protected long bytesize = 0;
     protected DapType basetype = null;
-    protected TypeSort primitivetype = null;
 
     protected D4DataCompoundArray d4data = null;
     protected long dimsize = 0;
@@ -74,7 +73,6 @@ public class CDMArrayStructure extends ArrayStructure implements CDMArray
         this.root = root;
         this.template = (DapVariable) d4data.getTemplate();
         this.basetype = this.template.getBaseType();
-        this.primitivetype = this.basetype.getAtomicType();
 
         this.dimsize = DapUtil.dimProduct(template.getDimensions());
         this.d4data = d4data;
@@ -130,12 +128,6 @@ public class CDMArrayStructure extends ArrayStructure implements CDMArray
     public DapType getBaseType()
     {
         return this.basetype;
-    }
-
-    @Override
-    public TypeSort getPrimitiveType()
-    {
-        return this.primitivetype;
     }
 
     //////////////////////////////////////////////////
