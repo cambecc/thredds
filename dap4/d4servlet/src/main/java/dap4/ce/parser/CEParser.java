@@ -20,6 +20,15 @@ public class CEParser extends CEParserBody
     static final long UNDEFINED = dap4.core.util.Slice.UNDEFINED;
 
     //////////////////////////////////////////////////
+    // static variables
+
+    static protected int globaldebuglevel = 0;
+
+    //////////////////////////////////////////////////
+    // static methods
+
+    static public void setGlobalDebugLevel(int level) {globaldebuglevel = level;}
+    //////////////////////////////////////////////////
     // Instance variables
 
     protected DapDataset template = null;
@@ -38,6 +47,8 @@ public class CEParser extends CEParserBody
         CELexer lexer = new CELexer(this);
         setLexer(lexer);
         this.template = template;
+	if(globaldebuglevel > 0)
+	    super.setDebugLevel(globaldebuglevel);
     }
 
     //////////////////////////////////////////////////

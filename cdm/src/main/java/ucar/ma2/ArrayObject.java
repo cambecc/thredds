@@ -147,7 +147,10 @@ public class ArrayObject extends Array {
 
  /** Return the element class type */
  @Override
-  public Class getElementType() { return elementType; }
+  public Class getElementType()
+ {
+     return elementType;
+ }
 
   @Override
   public boolean isVlen() {

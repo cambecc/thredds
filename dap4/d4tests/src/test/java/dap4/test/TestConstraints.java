@@ -1,5 +1,7 @@
 package dap4.test;
 
+import dap4.ce.parser.CEParser;
+import dap4.core.dmr.parser.Dap4Parser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +20,8 @@ import java.util.List;
 public class TestConstraints extends DapTestCommon
 {
     static final boolean DEBUG = false;
+    static final boolean DMRPARSEDEBUG = false;
+    static final boolean CEPARSEDEBUG = false;
 
     static final boolean NCDUMP = true; // Use NcDumpW instead of D4Print
 
@@ -108,6 +112,8 @@ public class TestConstraints extends DapTestCommon
         System.out.println("Using source url " + this.sourceurl);
         defineAllTestcases(this.root, this.sourceurl);
         chooseTestcases();
+        if(DMRPARSEDEBUG) Dap4Parser.setGlobalDebugLevel(1);
+        if(CEPARSEDEBUG) CEParser.setGlobalDebugLevel(1);
     }
 
     //////////////////////////////////////////////////
@@ -166,6 +172,7 @@ public class TestConstraints extends DapTestCommon
         int testcounter = 0;
 
         System.out.println("Testcase: " + testcase.testinputpath);
+        System.out.println("Baseline: "+testcase.baselinepath);
 
         String url = testcase.makeurl();
         NetcdfDataset ncfile = null;

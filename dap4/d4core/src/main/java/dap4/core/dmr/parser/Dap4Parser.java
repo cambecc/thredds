@@ -24,6 +24,19 @@ public class Dap4Parser extends Dap4ParserBody
     static final protected boolean isdatadmr = false; // temporary
 
     //////////////////////////////////////////////////
+    // static variables
+
+    static protected int globaldebuglevel = 0;
+
+    //////////////////////////////////////////////////
+    // Static methods
+
+    static public void setGlobalDebugLevel(int level)
+    {
+        globaldebuglevel = level;
+    }
+
+    //////////////////////////////////////////////////
     // Instance variables
 
     protected DapFactory factory = null;
@@ -43,6 +56,7 @@ public class Dap4Parser extends Dap4ParserBody
     {
         super();
         this.factory = factory; // see Dap4Actions
+        if(globaldebuglevel > 0) setDebugLevel(globaldebuglevel);
     }
 
     //////////////////////////////////////////////////

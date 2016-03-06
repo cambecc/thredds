@@ -439,13 +439,13 @@ abstract public class CDMUtil
         case OPAQUE:
             return ByteBuffer.class;
         case UBYTE:
-            return Byte.class;
+            return byte.class;
         case USHORT:
-            return Short.class;
+            return short.class;
         case UINT:
-            return Integer.class;
+            return int.class;
         case ULONG:
-            return Long.class;
+            return long.class;
         default:
             break;
         }
