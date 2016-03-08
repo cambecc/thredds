@@ -18,20 +18,19 @@ import dap4.core.dmr.*;
  */
 public enum DapSort
 {
-    ATOMICTYPE("AtomicType",DapType.class,null),
-    ATTRIBUTESET("AttributeSet", DapAttributeSet.class, null),
-    OTHERXML("OtherXML", DapOtherXML.class, null),
+    ATOMICTYPE("AtomicType", DapType.class),
+    ATTRIBUTESET("AttributeSet", DapAttributeSet.class),
+    OTHERXML("OtherXML", DapOtherXML.class),
     ATTRIBUTE("Attribute", DapAttribute.class, ATTRIBUTESET, OTHERXML),
-    XML("XML", DapXML.class, null),
-    DIMENSION("Dimension", DapDimension.class, null),
-    MAP("Map", DapMap.class, null),
-    ATOMICVARIABLE("Variable", DapVariable.class, null),
-    DATASET("Dataset", DapDataset.class, null),
+    DIMENSION("Dimension", DapDimension.class),
+    MAP("Map", DapMap.class),
+    ATOMICVARIABLE("Variable", DapVariable.class),
+    DATASET("Dataset", DapDataset.class),
     GROUP("Group", DapGroup.class, DATASET),
-    ENUMERATION("Enumeration", DapEnumeration.class, null),
-    ENUMCONST("EnumConst", DapEnumConst.class, null),
-    SEQUENCE("Sequence", DapSequence.class, null),
-    STRUCTURE("Structure", DapStructure.class, SEQUENCE),;
+    ENUMERATION("Enumeration", DapEnumeration.class),
+    ENUMCONST("EnumConst", DapEnumConst.class),
+    SEQUENCE("Sequence", DapSequence.class),
+    STRUCTURE("Structure", DapStructure.class,SEQUENCE),;
 
     private final String name;
     private final Class classfor;
@@ -64,12 +63,12 @@ public enum DapSort
         return false;
     }
 
-    /*
-static public boolean isa(DapSort sort, DapNode node)
+    public boolean oneof(DapSort... which)
     {
-        return sort == null
-                || sort.getClassFor().isInstance(node);
+        for(DapSort sub : which) {
+            if(sub == this) return true;
+        }
+        return false;
     }
-*/
 };
 

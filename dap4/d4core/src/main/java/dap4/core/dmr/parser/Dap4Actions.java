@@ -3,12 +3,15 @@
 
 package dap4.core.dmr.parser;
 
-import dap4.core.dmr.*;
+import dap4.core.dmr.DapFactory;
+import dap4.core.dmr.DapXML;
 import dap4.core.util.DapException;
 import dap4.core.util.DapSort;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The role of this class is as follows:
@@ -35,14 +38,14 @@ abstract public class Dap4Actions extends Dap4EventHandler
     static final BigInteger BIG_INT64_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
     static final DapSort[] METADATASCOPES = new DapSort[]{
-        DapSort.DATASET,
-        DapSort.GROUP,
-        DapSort.DIMENSION,
-        DapSort.MAP,
-        DapSort.ATOMICVARIABLE,
-        DapSort.STRUCTURE,
-        DapSort.SEQUENCE,
-        DapSort.ATTRIBUTESET
+            DapSort.DATASET,
+            DapSort.GROUP,
+            DapSort.DIMENSION,
+            DapSort.MAP,
+            DapSort.ATOMICVARIABLE,
+            DapSort.STRUCTURE,
+            DapSort.SEQUENCE,
+            DapSort.ATTRIBUTESET
     };
 
     //////////////////////////////////////////////////
@@ -75,14 +78,14 @@ abstract public class Dap4Actions extends Dap4EventHandler
 
     XMLAttributeMap
     xml_attribute_map()
-        throws DapException
+            throws DapException
     {
         return new XMLAttributeMap();
     }
 
     XMLAttributeMap
     xml_attribute_map(XMLAttributeMap map, SaxEvent token)
-        throws DapException
+            throws DapException
     {
         assert (map != null && token != null);
         if(map.containsKey(token.name))
@@ -93,14 +96,14 @@ abstract public class Dap4Actions extends Dap4EventHandler
 
     NamespaceList
     namespace_list()
-        throws DapException
+            throws DapException
     {
         return new NamespaceList();
     }
 
     NamespaceList
     namespace_list(NamespaceList list, SaxEvent token)
-        throws DapException
+            throws DapException
     {
         assert (list != null);
         if(token != null && !list.contains(token.name))
@@ -110,31 +113,21 @@ abstract public class Dap4Actions extends Dap4EventHandler
 
     DapXML
     createxmltext(String text)
-        throws DapException
+            throws DapException
     {
-        DapXML node = factory.newXML(DapXML.NodeType.TEXT,null);
+        DapXML node = new DapXML(DapXML.NodeType.TEXT, null);
         node.setText(text);
         return node;
     }
 
     DapXML
-    createxmlelement(SaxEvent open, XMLAttributeMap map, DapNode parent)
-        throws DapException
+    createxmlelement(SaxEvent open, XMLAttributeMap map)
+            throws DapException
     {
-        assert(parent != null);
-        DapXML node = factory.newXML(DapXML.NodeType.ELEMENT,open.name);
-        if(parent.getSort() == DapSort.OTHERXML) {
-            DapOtherXML aparent = (DapOtherXML) parent;
-            aparent.setRoot(node);
-        } else if(parent.getSort() == DapSort.XML) {
-            DapXML element = (DapXML) parent;
-            assert (element.getNodeType() == DapXML.NodeType.ELEMENT);
-            element.addElement(node);
-        } else
-            throw new DapException("XMLElement: unknown parent type");
-        for(Map.Entry<String,SaxEvent> entry : map.entrySet()) {
+        DapXML node = new DapXML(DapXML.NodeType.ELEMENT, open.name);
+        for(Map.Entry<String, SaxEvent> entry : map.entrySet()) {
             SaxEvent att = entry.getValue();
-            DapXML a = factory.newXML(DapXML.NodeType.ATTRIBUTE,att.name);
+            DapXML a = new DapXML(DapXML.NodeType.ATTRIBUTE, att.name);
             a.addXMLAttribute(a);
         }
         return node;
@@ -193,16 +186,6 @@ abstract public class Dap4Actions extends Dap4EventHandler
 
     abstract void value(SaxEvent value) throws ParseException;
 
-    abstract void enterotherxml(XMLAttributeMap attrs) throws ParseException;
-
-    abstract void leaveotherxml() throws ParseException;
-
-    abstract void enterxmlelement(SaxEvent open, XMLAttributeMap map) throws ParseException;
-
-    abstract void leavexmlelement(SaxEvent close) throws ParseException;
-
-    abstract void xmltext(SaxEvent text) throws ParseException;
-
     abstract void entererror(XMLAttributeMap attrs) throws ParseException;
 
     abstract void leaveerror() throws ParseException;
@@ -213,5 +196,12 @@ abstract public class Dap4Actions extends Dap4EventHandler
 
     abstract void errorotherinfo(SaxEvent value) throws ParseException;
 
+    abstract void otherxml(XMLAttributeMap attrs, DapXML root) throws ParseException;
+
+    abstract DapXML.XMLList xml_body(DapXML.XMLList body, DapXML elemortext) throws ParseException;
+
+    abstract DapXML element_or_text(SaxEvent open, XMLAttributeMap xmlattrlist, DapXML.XMLList body, SaxEvent close) throws ParseException;
+
+    abstract DapXML xmltext(SaxEvent text) throws ParseException;
 
 }// class Dap4Actions

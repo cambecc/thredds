@@ -169,7 +169,7 @@ public class TestServlet extends DapTestCommon
     chooseTestcases()
     {
         if(false) {
-            chosentests = locate("test_fill.nc");
+            chosentests = locate("test_struct_nested.hdf5");
             prop_visual = true;
         } else {
             for(ServletTest tc : alltestcases) {
@@ -717,7 +717,7 @@ public class TestServlet extends DapTestCommon
 
     //////////////////////////////////////////////////
     // Junit test methods
-    // @Test
+    @Test
     public void testServlet()
         throws Exception
     {
@@ -736,6 +736,7 @@ public class TestServlet extends DapTestCommon
         boolean pass = true;
 
         System.out.println("Testcase: " + testcase.testinputpath);
+        System.out.println("Baseline: " + testcase.baselinepath);
 
         for(String extension : testcase.extensions) {
             RequestMode ext = RequestMode.modeFor(extension);
@@ -901,21 +902,6 @@ public class TestServlet extends DapTestCommon
         }
         return results;
     }
-    //////////////////////////////////////////////////
-    // Stand alone
 
-    static public void
-    main(String[] argv)
-    {
-        try {
-            new TestServlet().testServlet();
-        } catch (Exception e) {
-            System.err.println("*** FAIL");
-            e.printStackTrace();
-            System.exit(1);
-        }
-        System.err.println("*** PASS");
-        System.exit(0);
-    }// main
 
 } // class TestServlet

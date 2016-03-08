@@ -169,9 +169,9 @@ public class Nc4Factory extends DefaultFactory
         return (DapEnumeration) tag(scope.peek(), super.newEnumeration(name, basetype), id);
     }
 
-    public DapEnumConst newEnumConst(String name, long value, DapEnumeration parent, int id)
+    public DapEnumConst newEnumConst(String name, long value, int id)
     {
-        return (DapEnumConst) tag(scope.peek(), super.newEnumConst(name, value, parent), id);
+        return (DapEnumConst) tag(scope.peek(), super.newEnumConst(name, value), id);
     }
 
     public DapStructure newStructure(String name, int id)

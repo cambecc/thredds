@@ -20,9 +20,7 @@ public interface DapFactory
     DapGroup newGroup(String name);
     DapDataset newDataset(String name);
     DapEnumeration newEnumeration(String name, DapType basetype);
-    DapEnumConst newEnumConst(String name, long value, DapEnumeration parent);
+    DapEnumConst newEnumConst(String name, long value);
     DapStructure newStructure(String name);
     DapSequence newSequence(String name);
-    DapXML newXML(DapXML.NodeType nodetype, String fullname);
-
 }

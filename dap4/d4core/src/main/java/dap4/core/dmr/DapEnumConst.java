@@ -14,11 +14,10 @@ public class DapEnumConst extends DapNode
     //////////////////////////////////////////////////
     // Constructors
 
-    public DapEnumConst(String name, Long value, DapEnumeration parent)
+    public DapEnumConst(String name, Long value)
     {
         super(name);
         this.value = value;
-        setParent(parent);
     }
 
     ///////////////////////////////////////////////////

@@ -76,9 +76,9 @@ public class DefaultFactory implements DapFactory
         return new DapEnumeration(name, basetype);
     }
 
-    public DapEnumConst newEnumConst(String name, long value, DapEnumeration parent)
+    public DapEnumConst newEnumConst(String name, long value)
     {
-        return new DapEnumConst(name, value, parent);
+        return new DapEnumConst(name, value);
     }
 
     public DapStructure newStructure(String name)
@@ -96,9 +96,5 @@ public class DefaultFactory implements DapFactory
         return new DapOtherXML(name);
     }
 
-    public DapXML newXML(DapXML.NodeType nodetype, String name)
-    {
-        return new DapXML(nodetype, name);
-    }
 }
 

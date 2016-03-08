@@ -16,6 +16,7 @@
 
 %code imports {
 import dap4.core.util.DapException;
+import dap4.core.dmr.DapXML;
 }
 
 %code lexer {
@@ -84,9 +85,9 @@ System.err.printf("near %s%n",getLocator());
 %type <SaxEvent> namespace
 %type <SaxEvent> atomictype_
 %type <SaxEvent> _atomictype
-%type <DapNode> element_or_text
 %type <SaxEvent> xml_open xml_close xml_attribute
-
+%type <DapXML.XMLList> xml_body
+%type <DapXML> element_or_text
 
 %start response
 
@@ -402,36 +403,26 @@ value:
 	;
 
 otherxml:
-	otherxmlprefix
-	xml_body
-	_OTHERXML
-		{leaveotherxml();}
-	;
-
-otherxmlprefix:
 	OTHERXML_
 	xml_attribute_map
-		{enterotherxml($2);}
+	element_or_text
+	_OTHERXML
+		{otherxml($2,$3);}
 	;
 
 xml_body:
-	  element_or_text
-	| xml_body element_or_text
+	  element_or_text {$$=xml_body(null,$1);}
+	| xml_body element_or_text {$$=xml_body($1,$2);}
 	;
 
 element_or_text:
-	element_or_textprefix
-	  xml_body
-	  xml_close
-		{leavexmlelement($3);}
-	| TEXT
-		{xmltext($1);}
-	;
-
-element_or_textprefix:
 	  xml_open
 	  xml_attribute_map
-		{enterxmlelement($1,$2);}
+	  xml_body
+	  xml_close
+		{$$=element_or_text($1,$2,$3,$4);}
+	| TEXT
+		{$$=xmltext($1);}
 	;
 
 /* Use a generic map of xml attributes; action

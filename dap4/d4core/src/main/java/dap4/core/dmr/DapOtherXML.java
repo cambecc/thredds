@@ -17,7 +17,7 @@ public class DapOtherXML extends DapAttribute
     //////////////////////////////////////////////////
     // Instance Variables
 
-    protected DapXML root = null;
+    protected Object root = null;
 
     //////////////////////////////////////////////////
     // Constructors
@@ -35,14 +35,14 @@ public class DapOtherXML extends DapAttribute
     //////////////////////////////////////////////////
     // Get/Set
 
-    public DapXML getRoot()
+    public Object getRoot()
     {
         return root;
     }
 
-    public void setRoot(DapXML xml)
+    public void setRoot(Object xml)
     {
         this.root = xml;
     }
-} // class DapOtherXML
+}
 

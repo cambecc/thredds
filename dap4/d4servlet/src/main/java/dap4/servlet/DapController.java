@@ -177,7 +177,7 @@ abstract public class DapController extends HttpServlet
     public void handleRequest(HttpServletRequest req, HttpServletResponse res)
             throws IOException
     {
-        DapLog.debug("doGet(): User-Agent = " + req.getHeader("User-Agent"));
+        dap4.servlet.DapLog.debug("doGet(): User-Agent = " + req.getHeader("User-Agent"));
         if(this.servletcontext == null)
             this.servletcontext = req.getServletContext();
         DapRequest drq = getRequestState(req, res);
@@ -191,7 +191,7 @@ abstract public class DapController extends HttpServlet
         if(query != null && query.length() >= 0) {
             info.append("?");
             info.append(query);
-            DapLog.debug(info.toString());
+            dap4.servlet.DapLog.debug(info.toString());
         }
         if(DEBUG) {
             System.err.println("DAP4 Servlet: processing url: " + drq.getOriginalURL());

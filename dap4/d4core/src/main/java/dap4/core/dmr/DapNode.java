@@ -100,8 +100,6 @@ abstract public class DapNode
             this.sort = DapSort.ATOMICTYPE;
         else if(this instanceof DapEnumConst)
             this.sort = DapSort.ENUMCONST;
-        else if(this instanceof DapXML)
-            this.sort = DapSort.XML;
         else if(this instanceof DapEnumeration)
             this.sort = DapSort.ENUMERATION;
         else if(this instanceof DapMap)
@@ -420,6 +418,8 @@ abstract public class DapNode
         List<DapNode> path = getPath(wrt);
         StringBuilder fqn = new StringBuilder();
         DapNode parent = path.get(0);
+        if(wrt != null)
+            fqn.append(wrt.getFQN());
         for(int i = 1; i < path.size(); i++) {// start past the root dataset
             DapNode current = path.get(i);
             // Depending on what parent is, use different delimiters
@@ -431,6 +431,8 @@ abstract public class DapNode
                 fqn.append(current.getEscapedShortName());
                 break;
             // These use '.'
+            case STRUCTURE:
+            case SEQUENCE:
             case ENUMCONST:
             case ATOMICVARIABLE:
                 fqn.append('.');

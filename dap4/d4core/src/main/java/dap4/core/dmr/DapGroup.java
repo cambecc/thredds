@@ -157,50 +157,31 @@ public class DapGroup extends DapNode implements DapDecl
     // Lookup Functions
 
     public DapNode
-    findByName(String name, DapSort sort)
-    {
-        return findInGroup(name, sort);
-    }
-
-    public List<DapNode>
-    findByName(String name, EnumSet<DapSort> sortset)
+    findByName(String name,DapSort... sortset)
     {
         return findInGroup(name, sortset);
     }
 
     public DapNode
-    findInGroup(String name, DapSort sort)
+    findInGroup(String name, DapSort... sortset)
     {
-        List<DapNode> set = findInGroup(name, EnumSet.of(sort));
-        assert set.size() <= 1;
-        if(set.size() == 0)
-            return null;
-        return set.get(0);
-    }
-
-    public List<DapNode>
-    findInGroup(String name, EnumSet<DapSort> sortset)
-    {
-        List<DapNode> matches = new ArrayList<DapNode>();
         for(DapSort sort : sortset) {
             switch (sort) {
             case ATTRIBUTE:
             case ATTRIBUTESET:
             case OTHERXML:
                 DapAttribute attr = super.getAttributes().get(name);
-                matches.add(attr);
-                break;
+                return attr;
             case DIMENSION:
                 for(DapDimension x : dimensions) {
                     if(x.getShortName().equals(name))
-                        matches.add(x);
+                        return x;
                 }
                 break;
-
             case ENUMERATION:
                 for(DapEnumeration x : enums) {
                     if(x.getShortName().equals(name))
-                        matches.add(x);
+                        return x;
                 }
                 break;
             case ATOMICVARIABLE:
@@ -208,7 +189,7 @@ public class DapGroup extends DapNode implements DapDecl
                     if(x.getSort() != sort)
                         continue;
                     if(x.getShortName().equals(name))
-                        matches.add(x);
+                        return x;
                 }
                 break;
             case STRUCTURE:
@@ -216,7 +197,7 @@ public class DapGroup extends DapNode implements DapDecl
                     if(x.getSort() != sort)
                         continue;
                     if(x.getShortName().equals(name))
-                        matches.add(x);
+                        return x;
                 }
                 break;
             case SEQUENCE:
@@ -224,21 +205,20 @@ public class DapGroup extends DapNode implements DapDecl
                     if(x.getSort() != sort)
                         continue;
                     if(x.getShortName().equals(name))
-                        matches.add(x);
+                        return (x);
                 }
                 break;
             case GROUP:
                 for(DapGroup x : groups) {
                     if(x.getShortName().equals(name))
-                        matches.add(x);
+                        return (x);
                 }
                 break;
-
             default:
                 break;
             }
         }
-        return matches;
+        return null;
     }
 
     /**
@@ -248,21 +228,11 @@ public class DapGroup extends DapNode implements DapDecl
      * to be WRT to the FQN of this node
      *
      * @param fqn  the fully qualified name
-     * @param sort the kind of object we are looking for
+     * @param sortset the kinds of object we are looking for
      * @return the matching Dap Node or null if not found
      */
     public DapNode
-    findByFQN(String fqn, DapSort sort)
-        throws DapException
-    {
-        List<DapNode> nodes = findByFQN(fqn, EnumSet.of(sort));
-        if(nodes == null || nodes.size() == 0)
-            throw new DapException("No such sort:" + sort);
-        return nodes.get(0);
-    }
-
-    public List<DapNode>
-    findByFQN(String fqn, EnumSet<DapSort> sortset)
+    findByFQN(String fqn, DapSort... sortset)
         throws DapException
     {
         fqn = fqn.trim();

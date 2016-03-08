@@ -415,7 +415,7 @@ public class CDMDSP extends AbstractDSP
             String name = entry.getValue();
             assert (name != null);
             int value = (int) entry.getKey();
-            dapenum.addEnumConst(name, new Long(value));
+            dapenum.addEnumConst(factory.newEnumConst(name, new Long(value)));
         }
         return dapenum;
     }
@@ -708,6 +708,7 @@ public class CDMDSP extends AbstractDSP
         for(int i = 0; iter.hasNext(); i++) {
             valuelist[i] = fixvalue(iter.next(), basetype);
         }
+        dapattr.setValues(valuelist);
         return dapattr;
     }
 

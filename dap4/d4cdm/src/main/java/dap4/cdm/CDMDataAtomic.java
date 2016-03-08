@@ -6,16 +6,17 @@ package dap4.cdm;
 
 import dap4.core.data.DataAtomic;
 import dap4.core.data.DataException;
-import dap4.core.dmr.TypeSort;
 import dap4.core.dmr.DapAtomicVariable;
 import dap4.core.dmr.DapType;
 import dap4.core.dmr.DapVariable;
+import dap4.core.dmr.TypeSort;
 import dap4.core.util.*;
 import dap4.dap4shared.AbstractDataVariable;
 import dap4.dap4shared.Dap4Util;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 
@@ -144,10 +145,18 @@ public class CDMDataAtomic extends AbstractDataVariable
     read(long index)
             throws DataException
     {
-        Object result;
         int i = (int) index;
         Array content = (Array) this.data;
         DataType datatype = content.getDataType();
+        return read(index, datatype, content);
+    }
+
+    protected Object
+    read(long index, DataType datatype, Array content)
+            throws DataException
+    {
+        Object result;
+        int i = (int)index;
         long tmp = 0;
         switch (datatype) {
         case BOOLEAN:
@@ -186,14 +195,26 @@ public class CDMDataAtomic extends AbstractDataVariable
             break;
         case USHORT:
             tmp = content.getShort(i) & 0xFFFF;
-            result = (Short) (short)tmp;
+            result = (Short) (short) tmp;
             break;
         case UINT:
             tmp = content.getInt(i) & 0xFFFFFFFF;
             result = (Integer) (int) tmp;
             break;
         case ULONG:
-            result = (Long)content.getLong(i);
+            result = (Long) content.getLong(i);
+            break;
+        case ENUM1:
+            result = read(index, DataType.BYTE, content);
+            break;
+        case ENUM2:
+            result = read(index, DataType.SHORT, content);
+            break;
+        case ENUM4:
+            result = read(index, DataType.INT, content);
+            break;
+        case OPAQUE:
+            result = content.getObject(i);
             break;
         case STRUCTURE:
         case SEQUENCE:

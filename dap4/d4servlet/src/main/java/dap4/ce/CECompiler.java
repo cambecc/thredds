@@ -101,12 +101,11 @@ public class CECompiler
         DapNode node = null;
         if(parent == null) {
             // name must be fqn
-            List<DapNode> matches = this.dataset.findByFQN(ast.name, EnumSet.of(DapSort.ATOMICVARIABLE, DapSort.SEQUENCE, DapSort.STRUCTURE));
-            if(matches == null || matches.size() == 0)
+            DapNode match = this.dataset.findByFQN(ast.name,
+                    DapSort.ATOMICVARIABLE, DapSort.SEQUENCE, DapSort.STRUCTURE);
+            if(match == null)
                 throw new DapException("Multiply defined variable name: " + ast.name);
-            if(matches.size() > 1)
-                throw new DapException("Multiply defined variable name: " + ast.name);
-            node = matches.get(0);
+            node = match;
         } else if(parent.getSort() == DapSort.STRUCTURE) {
             DapStructure struct = (DapStructure) parent;
             node = struct.findByName(ast.name);

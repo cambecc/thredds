@@ -68,16 +68,24 @@ public class DapEnumeration extends DapType
         this.basetype = basetype;
     }
 
-    public void addEnumConst(String name, Long value)
+    public void setEnumConsts(List<DapEnumConst> econsts)
             throws DapException
     {
-        DapEnumConst nold = lookup(name);
-        DapEnumConst vold = lookup(value);
+        for(DapEnumConst dec : econsts) {
+            addEnumConst(dec);
+        }
+    }
+
+    public void addEnumConst(DapEnumConst dec)
+            throws DapException
+    {
+        DapEnumConst nold = lookup(dec.getShortName());
+        DapEnumConst vold = lookup(dec.getValue());
         if(nold != null)
-            throw new DapException("DapEnumeration: Duplicate enum constant name: " + name);
+            throw new DapException("DapEnumeration: Duplicate enum constant name: " + dec.getShortName());
         else if(vold != null)
-            throw new DapException("DapEnumeration: Duplicate enum constant value: " + value);
-        DapEnumConst dec = new DapEnumConst(name, value, this);
+            throw new DapException("DapEnumeration: Duplicate enum constant value: " + dec.getValue());
+        dec.setParent(this);
         constants.add(dec);
     }
 

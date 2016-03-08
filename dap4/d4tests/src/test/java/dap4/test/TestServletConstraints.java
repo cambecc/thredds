@@ -318,6 +318,7 @@ public class TestServletConstraints extends DapTestCommon
     {
         boolean pass = true;
         System.out.println("Testcase: " + testcase.toString());
+        System.out.println("Baseline: " + testcase.baselinepath);
 
         for(String extension : testcase.extensions) {
             RequestMode ext = RequestMode.modeFor(extension);

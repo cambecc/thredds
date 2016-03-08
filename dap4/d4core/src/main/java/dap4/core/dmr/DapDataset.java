@@ -240,17 +240,15 @@ public class DapDataset extends DapGroup
      * @param sortset the kind(s) of object we are looking for
      * @return the matching Dap Node or null if not found
      */
-    public List<DapNode>
-    lookup(String fqn, EnumSet<DapSort> sortset)
+    public DapNode
+    lookup(String fqn, DapSort... sortset)
         throws DapException
     {
-        List<DapNode> matches = new ArrayList<DapNode>();
         fqn = fqn.trim();
         if(fqn == null)
             return null;
         if("".equals(fqn) || "/".equals(fqn)) {
-            matches.add(this);
-            return matches;
+            return this;
         }
         if(fqn.charAt(0) != '/')
             return null;
@@ -275,7 +273,7 @@ public class DapDataset extends DapGroup
         List<String> structpath = DapUtil.backslashSplit(varpart, '.');
         String outer = Escape.backslashUnescape(structpath.get(0));
         if(structpath.size() == 1) {
-            matches.addAll(current.findInGroup(outer, sortset));
+            return current.findInGroup(outer, sortset);
         } else {// It is apparently a structure field
             // locate the outermost structure to start with
             DapStructure currentstruct = (DapStructure) current.findInGroup(outer, DapSort.STRUCTURE);
@@ -296,10 +294,10 @@ public class DapDataset extends DapGroup
             DapNode field = currentstruct.findByName(fieldname);
             if(field == null)
                 throw new DapException("No such field: " + fieldname);
-            if(sortset.contains(field.getSort()))
-                matches.add(field);
+            if(field.getSort().oneof(sortset))
+                return (field);
         }
-        return matches;
+        return null;
     }
 
     //////////////////////////////////////////////////

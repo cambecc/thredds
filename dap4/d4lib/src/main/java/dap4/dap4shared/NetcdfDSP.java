@@ -568,7 +568,7 @@ public class NetcdfDSP extends AbstractDSP
         for(int i = 0; i < nconsts; i++) {
             // Get info about the ith const
             errcheck(ret = nc4.nc_inq_enum_member(gid, tid, i, namep, valuep));
-            de.addEnumConst(makeString(namep), (long) valuep.getValue());
+            de.addEnumConst(factory.newEnumConst(makeString(namep), (long) valuep.getValue()));
         }
     }
 

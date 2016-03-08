@@ -4,7 +4,10 @@
 package dap4.core.dmr.parser;
 
 import dap4.core.dmr.*;
-import dap4.core.util.*;
+import dap4.core.util.DapException;
+import dap4.core.util.DapSort;
+import dap4.core.util.DapUtil;
+import dap4.core.util.Escape;
 import org.xml.sax.SAXException;
 
 import java.math.BigInteger;
@@ -77,7 +80,7 @@ public class Dap4Parser extends Dap4ParserBody
 
     public boolean
     parse(String input)
-        throws SAXException
+            throws SAXException
     {
         return super.parse(input);
     }
@@ -87,7 +90,7 @@ public class Dap4Parser extends Dap4ParserBody
 
     DapGroup
     getGroupScope()
-        throws DapException
+            throws DapException
     {
         DapGroup gscope = (DapGroup) searchScope(DapSort.GROUP, DapSort.DATASET);
         if(gscope == null) throw new DapException("Undefined Group Scope");
@@ -96,7 +99,7 @@ public class Dap4Parser extends Dap4ParserBody
 
     DapNode
     getMetadataScope()
-        throws DapException
+            throws DapException
     {
         // Search up the stack for first match.
         DapNode match = searchScope(METADATASCOPES);
@@ -107,7 +110,7 @@ public class Dap4Parser extends Dap4ParserBody
 
     DapNode
     getParentScope()
-        throws DapException
+            throws DapException
     {
         DapNode parent = searchScope(DapSort.STRUCTURE, DapSort.SEQUENCE, DapSort.GROUP, DapSort.DATASET);
         if(parent == null) throw new DapException("Undefined parent Scope");
@@ -116,7 +119,7 @@ public class Dap4Parser extends Dap4ParserBody
 
     DapVariable
     getVariableScope()
-        throws DapException
+            throws DapException
     {
         DapNode match = searchScope(DapSort.ATOMICVARIABLE, DapSort.STRUCTURE, DapSort.SEQUENCE);
         if(match == null)
@@ -126,7 +129,7 @@ public class Dap4Parser extends Dap4ParserBody
 
     DapNode
     getScope(DapSort... sort)
-        throws DapException
+            throws DapException
     {
         DapNode node = searchScope(sort);
         if(node == null) // return exception if not found
@@ -140,7 +143,7 @@ public class Dap4Parser extends Dap4ParserBody
         Iterator it = scopestack.iterator();
         while(it.hasNext()) {
             DapNode node = (DapNode) it.next();
-            for(int j = 0;j < sort.length;j++) {
+            for(int j = 0; j < sort.length; j++) {
                 if(node.getSort() == sort[j])
                     return node;
             }
@@ -191,7 +194,7 @@ public class Dap4Parser extends Dap4ParserBody
     DapAttribute
     makeAttribute(DapSort sort, String name, DapType basetype,
                   List<String> nslist, DapNode parent)
-        throws DapException
+            throws DapException
     {
         DapAttribute attr = factory.newAttribute(name, basetype);
         if(sort == DapSort.ATTRIBUTE) {
@@ -232,7 +235,7 @@ public class Dap4Parser extends Dap4ParserBody
 
     DapAttribute
     lookupAttribute(DapNode parent, XMLAttributeMap attrs)
-        throws DapException
+            throws DapException
     {
         SaxEvent name = pull(attrs, "name");
         if(isempty(name))
@@ -243,7 +246,7 @@ public class Dap4Parser extends Dap4ParserBody
 
     void
     changeAttribute(DapAttribute attr, XMLAttributeMap description)
-        throws DapException
+            throws DapException
     {
         SaxEvent name = pull(description, "name");
         if(isempty(name))
@@ -275,7 +278,7 @@ public class Dap4Parser extends Dap4ParserBody
 
     DapAttribute
     createatomicattribute(XMLAttributeMap attrs, NamespaceList nslist, DapNode parent)
-        throws DapException
+            throws DapException
     {
         SaxEvent name = pull(attrs, "name");
         SaxEvent atype = pull(attrs, "type");
@@ -296,20 +299,20 @@ public class Dap4Parser extends Dap4ParserBody
 
     DapAttribute
     createcontainerattribute(XMLAttributeMap attrs, NamespaceList nslist, DapNode parent)
-        throws DapException
+            throws DapException
     {
         SaxEvent name = pull(attrs, "name");
         if(isempty(name))
             throw new ParseException("ContainerAttribute: Empty attribute name");
         List<String> hreflist = convertNamespaceList(nslist);
         DapAttribute attr
-            = makeAttribute(DapSort.ATTRIBUTESET, name.value, null, hreflist, parent);
+                = makeAttribute(DapSort.ATTRIBUTESET, name.value, null, hreflist, parent);
         return attr;
     }
 
     void
     createvalue(SaxEvent value, DapAttribute parent)
-        throws DapException
+            throws DapException
     {
         List<String> textlist = null;
         if(value.eventtype == SaxEventType.CHARACTERS) {
@@ -322,9 +325,9 @@ public class Dap4Parser extends Dap4ParserBody
             parent.setValues(textlist.toArray());
     }
 
-    DapAttribute
+    DapOtherXML
     createotherxml(XMLAttributeMap attrs, DapNode parent)
-        throws DapException
+            throws DapException
     {
         SaxEvent name = pull(attrs, "name");
         SaxEvent href = pull(attrs, "href");
@@ -333,8 +336,8 @@ public class Dap4Parser extends Dap4ParserBody
         List<String> nslist = new ArrayList<String>();
         if(!isempty(href))
             nslist.add(href.value);
-        DapAttribute other
-            = makeAttribute(DapSort.OTHERXML, name.value, null, nslist, parent);
+        DapOtherXML other
+                = (DapOtherXML)makeAttribute(DapSort.OTHERXML, name.value, null, nslist, parent);
         parent.setAttribute(other);
         return other;
     }
@@ -343,7 +346,7 @@ public class Dap4Parser extends Dap4ParserBody
      * Add slices to the variable view and
      * do additional semantic checks. Only
      * used when isdatadmr = true.
-     * <p/>
+     * <p>
      * param var to validate
      *
      * @throws DapException
@@ -363,11 +366,10 @@ public class Dap4Parser extends Dap4ParserBody
 */
     //////////////////////////////////////////////////
     // Abstract action definitions
-
     @Override
     void
     enterdataset(XMLAttributeMap attrs)
-        throws ParseException
+            throws ParseException
     {
         this.debug = getDebugLevel() > 0; // make sure we have the latest value
         if(debug) report("enterdataset");
@@ -403,7 +405,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     leavedataset()
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("leavedataset");
         assert (scopestack.peek() != null && scopestack.peek().getSort() == DapSort.DATASET);
@@ -417,7 +419,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     entergroup(SaxEvent name)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("entergroup");
         try {
@@ -444,7 +446,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     leavegroup()
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("leavegroup");
         scopestack.pop();
@@ -453,7 +455,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     enterenumdef(XMLAttributeMap attrs)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("enterenumdef");
         try {
@@ -506,7 +508,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     leaveenumdef()
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("leaveenumdef");
         DapEnumeration eparent = (DapEnumeration) scopestack.pop();
@@ -518,7 +520,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     enumconst(SaxEvent name, SaxEvent value)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("enumconst");
         if(isempty(name))
@@ -544,9 +546,9 @@ public class Dap4Parser extends Dap4ParserBody
                 DapEnumConst seconst = parent.lookup(lvalue);
                 if(leconst != null || seconst != null)
                     throw new ParseException(String.format("Template enumeration constant mismatch: %s.%s",
-                        parent.getShortName(), leconst));
+                            parent.getShortName(), leconst));
             } else
-                parent.addEnumConst(name.value, lvalue);
+                parent.addEnumConst(factory.newEnumConst(name.value, lvalue));
         } catch (DapException de) {
             throw new ParseException(de);
         }
@@ -555,7 +557,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     enterdimdef(XMLAttributeMap attrs)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("enterdimdef");
         SaxEvent name = pull(attrs, "name");
@@ -600,8 +602,8 @@ public class Dap4Parser extends Dap4ParserBody
             }
             scopestack.push(dim);
         } catch (
-            DapException de
-            )
+                DapException de
+                )
 
         {
             throw new ParseException(de);
@@ -612,7 +614,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     leavedimdef()
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("leavedimdef");
         scopestack.pop();
@@ -621,7 +623,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     dimref(SaxEvent nameorsize)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("dimref");
         try {
@@ -674,7 +676,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     enteratomicvariable(SaxEvent open, SaxEvent name)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("enteratomicvariable");
         try {
@@ -706,11 +708,11 @@ public class Dap4Parser extends Dap4ParserBody
                 }
                 // Verify consistency
                 if(var.getSort() != DapSort.ATOMICVARIABLE
-                    || ((DapAtomicVariable)var).getBaseType() != ((DapAtomicVariable)var).getBaseType())
+                        || ((DapAtomicVariable) var).getBaseType() != ((DapAtomicVariable) var).getBaseType())
                     throw new ParseException("Template variable mismatch: " + name.value);
             } else { //!isdatadmr
                 // Do type substitutions
-                var = factory.newAtomicVariable(name.value,basetype);
+                var = factory.newAtomicVariable(name.value, basetype);
                 // Look at the parent scope
                 DapNode parent = scopestack.peek();
                 if(parent == null)
@@ -737,7 +739,7 @@ public class Dap4Parser extends Dap4ParserBody
     }
 
     void openclosematch(SaxEvent close, DapSort sort)
-        throws ParseException
+            throws ParseException
     {
         String typename = close.name;
         if("Byte".equals(typename)) typename = "UInt8"; // special case
@@ -765,7 +767,7 @@ public class Dap4Parser extends Dap4ParserBody
     }
 
     void leavevariable()
-        throws ParseException
+            throws ParseException
     {
         //DapVariable var = getVariableScope();
         //if(isdatadmr)
@@ -775,7 +777,7 @@ public class Dap4Parser extends Dap4ParserBody
 
     void
     leaveatomicvariable(SaxEvent close)
-        throws ParseException
+            throws ParseException
     {
         openclosematch(close, DapSort.ATOMICVARIABLE);
         leavevariable();
@@ -784,7 +786,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     enterenumvariable(XMLAttributeMap attrs)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("enterenumvariable");
         try {
@@ -849,7 +851,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     leaveenumvariable(SaxEvent close)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("leaveenumvariable");
         openclosematch(close, DapSort.ATOMICVARIABLE);
@@ -859,7 +861,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     entermap(SaxEvent name)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("entermap");
         if(isempty(name))
@@ -883,7 +885,7 @@ public class Dap4Parser extends Dap4ParserBody
             throw new ParseException(de);
         }
         if((container.getSort() == DapSort.STRUCTURE || container.getSort() == DapSort.SEQUENCE)
-            && container == scope)
+                && container == scope)
             throw new ParseException("Mapref: map variable not in outer scope: " + name.name);
         DapMap map = factory.newMap(var);
         try {
@@ -901,7 +903,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     leavemap()
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("leavemap");
         scopestack.pop();
@@ -910,7 +912,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     enterstructurevariable(SaxEvent name)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("enterstructurevariable");
         if(isempty(name))
@@ -966,7 +968,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     leavestructurevariable(SaxEvent close)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("leavestructurevariable");
         openclosematch(close, DapSort.STRUCTURE);
@@ -976,7 +978,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     entersequencevariable(SaxEvent name)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("entersequencevariable");
         if(isempty(name))
@@ -1036,7 +1038,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     leavesequencevariable(SaxEvent close)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("leavesequencevariable");
         openclosematch(close, DapSort.SEQUENCE);
@@ -1046,7 +1048,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     enteratomicattribute(XMLAttributeMap attrs, NamespaceList nslist)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("enteratomicattribute");
         try {
@@ -1073,7 +1075,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     leaveatomicattribute()
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("leaveatomicattribute");
         DapAttribute attr = (DapAttribute) scopestack.pop();
@@ -1085,7 +1087,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     entercontainerattribute(XMLAttributeMap attrs, NamespaceList nslist)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("entercontainerattribute");
         try {
@@ -1112,7 +1114,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     leavecontainerattribute()
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("leavecontainerattribute");
         scopestack.pop();
@@ -1120,7 +1122,7 @@ public class Dap4Parser extends Dap4ParserBody
 
     @Override
     void value(SaxEvent value)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("value");
         try {
@@ -1133,79 +1135,73 @@ public class Dap4Parser extends Dap4ParserBody
 
     @Override
     void
-    enterotherxml(XMLAttributeMap attrs)
-        throws ParseException
+    otherxml(XMLAttributeMap attrs, DapXML root)
+            throws ParseException
     {
         if(debug) report("enterotherxml");
         try {
             DapNode parent = getMetadataScope();
-            DapAttribute other = createotherxml(attrs, parent);
+            DapOtherXML other = createotherxml(attrs, parent);
             parent.setAttribute(other);
-            scopestack.push(other);
+            other.setRoot(root);
+            if(debug) report("leaveotherxml");
         } catch (DapException de) {
             throw new ParseException(de);
         }
     }
 
     @Override
-    void
-    leaveotherxml()
-        throws ParseException
+    DapXML.XMLList
+    xml_body(DapXML.XMLList body, DapXML elemortext)
+            throws ParseException
     {
-        if(debug) report("leaveotherxml");
-        scopestack.pop();
+        if(debug) report("xml_body.enter");
+        if(body == null) body = new DapXML.XMLList();
+        if(elemortext != null)
+            body.add(elemortext);
+        if(debug) report("xml_body.exit");
+        return body;
     }
 
     @Override
-    void
-    enterxmlelement(SaxEvent open, XMLAttributeMap map)
-        throws ParseException
+    DapXML
+    element_or_text(SaxEvent open, XMLAttributeMap map, DapXML.XMLList body, SaxEvent close)
+            throws ParseException
     {
-        if(debug) report("enterxmlelement");
         try {
-            DapNode parent = scopestack.peek();
-            DapXML xml = createxmlelement(open, map, parent);
-            scopestack.push(xml);
-        } catch (DapException de) {
-            throw new ParseException(de);
+            if(debug) report("element_or_text.enter");
+            if(!open.name.equalsIgnoreCase(close.name))
+                throw new ParseException(
+                        String.format("OtherXML: mismatch: <%s> vs </%s>",open.name,close.name));
+            DapXML thisxml = createxmlelement(open, map);
+            for(DapXML xml : body) {
+                thisxml.addElement(xml);
+            }
+            if(debug) report("element_or_text.exit");
+            return thisxml;
+        } catch (DapException e) {
+            throw new ParseException(e);
         }
     }
 
     @Override
-    void
-    leavexmlelement(SaxEvent close)
-        throws ParseException
-    {
-        if(debug) report("leavexmlelement");
-        try {
-            DapXML open = (DapXML) getScope(DapSort.XML);
-            if(!open.getShortName().equals(close.name))
-                throw new ParseException(String.format("otherxml: open/close name mismatch: <%s> </%s>",
-                    open.getShortName(), close.name));
-            scopestack.pop();
-        } catch (DapException de) {
-            throw new ParseException(de);
-        }
-    }
-
-    void
+    DapXML
     xmltext(SaxEvent text)
-        throws ParseException
+            throws ParseException
     {
-        if(debug) report("xmltext");
         try {
+            if(debug) report("xmltext");
             DapXML txt = createxmltext(text.text);
-            DapXML parent = (DapXML) getScope(DapSort.XML);
-            parent.addElement(txt);
-        } catch (DapException de) {
-            throw new ParseException(de);
+            return txt;
+        } catch (DapException e) {
+            throw new ParseException(e);
         }
     }
 
     @Override
     void
     entererror(XMLAttributeMap attrs)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("entererror");
         SaxEvent xhttpcode = pull(attrs, "httpcode");
@@ -1223,7 +1219,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     leaveerror()
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("leaveerror");
         assert (this.errorresponse != null) : "Internal Error";
@@ -1232,7 +1228,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     errormessage(SaxEvent value)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("errormessage");
         assert (this.errorresponse != null) : "Internal Error";
@@ -1245,7 +1241,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     errorcontext(SaxEvent value)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("errorcontext");
         assert (this.errorresponse != null) : "Internal Error";
@@ -1258,7 +1254,7 @@ public class Dap4Parser extends Dap4ParserBody
     @Override
     void
     errorotherinfo(SaxEvent value)
-        throws ParseException
+            throws ParseException
     {
         if(debug) report("errorotherinfo");
         assert (this.errorresponse != null) : "Internal Error";
