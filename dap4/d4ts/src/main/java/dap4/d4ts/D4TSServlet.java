@@ -6,6 +6,7 @@ package dap4.d4ts;
 
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
+import dap4.dap4shared.DapLog;
 import dap4.dap4shared.FileDSP;
 import dap4.servlet.*;
 
@@ -67,6 +68,7 @@ public class D4TSServlet extends DapController
     @Override
     public void initialize()
     {
+        DapLog.info("Initializing d4ts servlet");
     }
 
     //////////////////////////////////////////////////
