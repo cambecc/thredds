@@ -102,6 +102,13 @@ public class Dap4Controller extends DapController
     //////////////////////////////////////////////////////////
 
     @Override
+    public void initialize()
+    {
+
+    }
+
+
+    @Override
     protected void
     doFavicon(DapRequest drq, String icopath)
             throws IOException

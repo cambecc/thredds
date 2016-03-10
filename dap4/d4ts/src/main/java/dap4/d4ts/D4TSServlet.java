@@ -6,8 +6,11 @@ package dap4.d4ts;
 
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
+import dap4.dap4shared.FileDSP;
 import dap4.servlet.*;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,6 +40,7 @@ public class D4TSServlet extends DapController
             // Register known DSP classes: order is important.
             // Only used in server
             registerDSP(SynDSP.class, true);
+            registerDSP(FileDSP.class, true);
         }
 
     }
@@ -58,6 +62,22 @@ public class D4TSServlet extends DapController
         super("d4ts");
     }
 
+    @Override
+    public void initialize()
+    {
+    }
+
+    //////////////////////////////////////////////////
+
+    @Override
+    protected void doGet(HttpServletRequest req,
+                         HttpServletResponse resp)
+            throws ServletException,
+            java.io.IOException
+    {
+        super.handleRequest(req, resp);
+    }
+
     //////////////////////////////////////////////////////////
     // Capabilities processors
 
@@ -66,7 +86,7 @@ public class D4TSServlet extends DapController
     doFavicon(DapRequest drq, String icopath)
             throws IOException
     {
-        String favfile = getResourcePath(drq,icopath);
+        String favfile = getResourcePath(drq, icopath);
         if(favfile != null) {
             try (FileInputStream fav = new FileInputStream(favfile);) {
                 byte[] content = DapUtil.readbinaryfile(fav);
@@ -85,7 +105,7 @@ public class D4TSServlet extends DapController
 
         // Figure out the directory containing
         // the files to display.
-        String dir = getResourcePath(drq,"");
+        String dir = getResourcePath(drq, "");
         if(dir == null)
             throw new DapException("Cannot locate resources directory");
 

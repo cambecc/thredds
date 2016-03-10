@@ -162,8 +162,10 @@ abstract public class DapController extends HttpServlet
      */
     abstract public String getServletID();
 
-    //////////////////////////////////////////////////////////
-    // Accessors
+    /**
+     * Initialize servlet
+     */
+    abstract public void initialize();
 
     //////////////////////////////////////////////////////////
 
@@ -177,10 +179,11 @@ abstract public class DapController extends HttpServlet
             Field charset = Charset.class.getDeclaredField("defaultCharset");
             charset.setAccessible(true);
             charset.set(null, null);
+            initialize();
+            setBinaryWritelimit(getBinaryWriteLimit());
         } catch (Exception e) {
             throw new ServletException(e);
         }
-        setBinaryWritelimit(getBinaryWriteLimit());
     }
 
     //////////////////////////////////////////////////////////
