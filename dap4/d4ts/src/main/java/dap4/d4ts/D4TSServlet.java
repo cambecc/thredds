@@ -10,6 +10,8 @@ import dap4.dap4shared.FileDSP;
 import dap4.servlet.*;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
