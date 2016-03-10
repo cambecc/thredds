@@ -19,7 +19,7 @@ import dap4.core.util.DapContext;
 import dap4.core.util.DapException;
 import dap4.core.util.DapSort;
 import dap4.core.util.DapUtil;
-import dap4.servlet.DapLog;
+import dap4.dap4shared.DapLog;
 
 import java.io.File;
 import java.lang.reflect.Array;

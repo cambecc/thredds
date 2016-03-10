@@ -11,8 +11,13 @@ import dap4.ce.CEConstraint;
 import dap4.ce.parser.CEParser;
 import dap4.core.dmr.DapDataset;
 import dap4.core.dmr.ErrorResponse;
-import dap4.core.util.*;
-import dap4.dap4shared.*;
+import dap4.core.util.DapException;
+import dap4.core.util.DapUtil;
+import dap4.core.util.ResponseFormat;
+import dap4.dap4shared.DSP;
+import dap4.dap4shared.DapLog;
+import dap4.dap4shared.DapProtocol;
+import dap4.dap4shared.RequestMode;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -112,7 +117,7 @@ abstract public class DapController extends HttpServlet
 
     public DapController(String controllerpath)
     {
-        this.controllerpath = DapUtil.canonjoin("",controllerpath);
+        this.controllerpath = DapUtil.canonjoin("", controllerpath);
     }
 
     //////////////////////////////////////////////////////////
@@ -141,14 +146,21 @@ abstract public class DapController extends HttpServlet
      * @param drq The wrapped request info
      */
 
-    abstract protected String getResourcePath(DapRequest drq, String relpath) throws IOException;
+    abstract public String getResourcePath(DapRequest drq, String relpath) throws IOException;
 
     /**
      * Get the maximum # of bytes per request
      *
      * @return size
      */
-    abstract protected long getBinaryWriteLimit();
+    abstract public long getBinaryWriteLimit();
+
+    /**
+     * Get the servlet name (with no leading or trailing slashes)
+     *
+     * @return name
+     */
+    abstract public String getServletID();
 
     //////////////////////////////////////////////////////////
     // Accessors
@@ -177,7 +189,7 @@ abstract public class DapController extends HttpServlet
     public void handleRequest(HttpServletRequest req, HttpServletResponse res)
             throws IOException
     {
-        dap4.servlet.DapLog.debug("doGet(): User-Agent = " + req.getHeader("User-Agent"));
+        DapLog.debug("doGet(): User-Agent = " + req.getHeader("User-Agent"));
         if(this.servletcontext == null)
             this.servletcontext = req.getServletContext();
         DapRequest drq = getRequestState(req, res);
@@ -191,13 +203,13 @@ abstract public class DapController extends HttpServlet
         if(query != null && query.length() >= 0) {
             info.append("?");
             info.append(query);
-            dap4.servlet.DapLog.debug(info.toString());
+            DapLog.debug(info.toString());
         }
         if(DEBUG) {
             System.err.println("DAP4 Servlet: processing url: " + drq.getOriginalURL());
         }
         if(url.endsWith(FAVICON)) {
-            doFavicon(drq,FAVICON);
+            doFavicon(drq, FAVICON);
             return;
         }
         String datasetpath = DapUtil.nullify(drq.getDataset());

@@ -9,7 +9,7 @@ so we can replace it if needed.
 Currently wraps org.slf4j.Logger
 */
 
-package dap4.servlet;
+package dap4.dap4shared;
 
 public class DapLog
 {

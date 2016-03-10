@@ -35,14 +35,18 @@ package thredds.server.dap4;
 
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
-import dap4.servlet.*;
+import dap4.dap4shared.DapCodes;
+import dap4.servlet.DSPFactory;
+import dap4.servlet.DapCache;
+import dap4.servlet.DapController;
+import dap4.servlet.DapRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import thredds.core.TdsRequestedDataset;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.net.URL;
 
 @Controller
 @RequestMapping("/dap4")
@@ -118,36 +122,32 @@ public class Dap4Controller extends DapController
     }
 
     @Override
-    protected long
+    public long
     getBinaryWriteLimit()
     {
         return DEFAULTBINARYWRITELIMIT;
     }
 
     @Override
-    protected String
+    public String
+    getServletID()
+    {
+        return "dap4";
+    }
+
+    @Override
+    public String
     getResourcePath(DapRequest drq, String relpath)
             throws IOException
     {
-        // Using context information, we need to
-        // construct a file path to the specified dataset
-        URL realpathurl = servletcontext.getResource(relpath);
-        String realpath = null;
-        if(realpathurl.getProtocol().equalsIgnoreCase("file"))
-            realpath = realpathurl.getPath();
-        else
-            throw new DapException("Requested file not found " + realpathurl)
-                                .setCode(HttpServletResponse.SC_NOT_FOUND);
-
-        // See if it really exists and is readable and of proper type
-        File dataset = new File(realpath);
-        if(!dataset.exists())
-            throw new DapException("Requested file does not exist: " + realpath)
-                    .setCode(HttpServletResponse.SC_NOT_FOUND);
-
-        if(!dataset.canRead())
-            throw new DapException("Requested file not readable: " + realpath)
-                    .setCode(HttpServletResponse.SC_FORBIDDEN);
+        File realfile  = TdsRequestedDataset.getFile(relpath);
+        String realpath = realfile.getAbsolutePath();
+        if(!realfile.exists())
+            throw new DapException("Requested file not found " + realpath)
+                    .setCode(DapCodes.SC_NOT_FOUND);
+        if(!realfile.canRead())
+            throw new DapException("Requested file not readable " + realpath)
+                    .setCode(DapCodes.SC_FORBIDDEN);
         return realpath;
     }
 

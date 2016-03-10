@@ -106,7 +106,7 @@ public class D4TSServlet extends DapController
     }
 
     @Override
-    protected String
+    public String
     getResourcePath(DapRequest drq, String relativepath)
             throws IOException
     {
@@ -128,8 +128,15 @@ public class D4TSServlet extends DapController
     }
 
     @Override
-    protected long getBinaryWriteLimit()
+    public long getBinaryWriteLimit()
     {
         return DEFAULTBINARYWRITELIMIT;
+    }
+
+    @Override
+    public String
+    getServletID()
+    {
+        return "d4ts";
     }
 }
