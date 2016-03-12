@@ -6,6 +6,7 @@ package dap4.dap4shared;
 
 import dap4.core.util.*;
 import dap4.dap4shared.*;
+import ucar.httpservices.HTTPUtil;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -35,7 +36,6 @@ public class FileDSP extends D4DSP
     //////////////////////////////////////////////////
     // DSP API
 
-
     /**
      * A path is file if it has no base protocol or is file:
      *
@@ -64,12 +64,16 @@ public class FileDSP extends D4DSP
     open(String path, DapContext context)
             throws DapException
     {
-        setPath(path);
+        setPath(DapUtil.canonicalpath(path));
         try {
-            String filepath = path;
-            XURI xuri = new XURI(path);
-            if(xuri.getProtocols().size() > 0)
-                filepath = xuri.getPath();
+            String filepath = this.path;
+            if(filepath.startsWith("file:"))
+                filepath = filepath.substring("file:".length());
+            while(filepath.startsWith("/")) // remove all leading slashes
+                filepath = filepath.substring(1);
+            // Absolutize
+            if(!DapUtil.hasDriveLetter(filepath))
+                filepath = "/" + filepath;
             FileInputStream stream = new FileInputStream(filepath);
             this.raw = DapUtil.readbinaryfile(stream);
             stream.close();
@@ -80,8 +84,6 @@ public class FileDSP extends D4DSP
             stream.close();
             super.build(document, serialdata, rdr.getByteOrder());
             return this;
-        } catch (URISyntaxException use) {
-            throw new DapException(use);
         } catch (IOException ioe) {
             throw new DapException(ioe);
         }

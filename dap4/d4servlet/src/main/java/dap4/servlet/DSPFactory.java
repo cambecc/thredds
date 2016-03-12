@@ -19,12 +19,31 @@ abstract public class DSPFactory
 {
 
     //////////////////////////////////////////////////
+    // Type decls
+
+    static protected class Registration
+    {
+        public Class dspclass;
+        public Method matcher;
+
+        public Registration(Class dspclass)
+        {
+            this.dspclass = dspclass;
+            try {
+                this.matcher = dspclass.getMethod("match", String.class, DapContext.class);
+            } catch (NoSuchMethodException e) {
+                throw new IllegalArgumentException("DSPFactory: no match method for DSP: " + dspclass.getName());
+            }
+        }
+    }
+
+    //////////////////////////////////////////////////
     // Instance variables
 
     /**
      * Define a map of known DSP classes.
      */
-    protected  List<Class> dspRegistry = new ArrayList<Class>();
+    protected List<Registration> dspRegistry = new ArrayList<>();
 
     //////////////////////////////////////////////////
     // Constructor(s)
@@ -48,7 +67,7 @@ abstract public class DSPFactory
      * @throws ClassNotFoundException if class not found.
      */
     public void registerDSP(String className)
-        throws DapException
+            throws DapException
     {
         try {
             Class klass = DSPFactory.class.getClassLoader().loadClass(className);
@@ -83,15 +102,15 @@ abstract public class DSPFactory
     synchronized public void registerDSP(Class klass, boolean last)
     {
         // is this already defined?
-        int pos = dspRegistry.indexOf(klass);
-        if(pos < 0) {
-            if(last)
-                dspRegistry.add(klass);  // put last
-            else
-                dspRegistry.add(0, klass);  // put first
+        for(int i = 0; i < dspRegistry.size(); i++) {
+            if(dspRegistry.get(i).dspclass == klass)
+                return; // already in registry
         }
+        if(last)
+            dspRegistry.add(new Registration(klass));
+        else
+            dspRegistry.add(0, new Registration(klass));
     }
-
 
     /**
      * See if a specific DSP is registered
@@ -101,7 +120,11 @@ abstract public class DSPFactory
 
     synchronized public boolean dspRegistered(Class klass)
     {
-        return dspRegistry.contains(klass);
+        for(int i = 0; i < dspRegistry.size(); i++) {
+            if(dspRegistry.get(i).dspclass == klass)
+                return true;
+        }
+        return false;
     }
 
     /**
@@ -111,7 +134,12 @@ abstract public class DSPFactory
      */
     synchronized public void dspUnregister(Class klass)
     {
-        dspRegistry.remove(klass);
+        for(int i = 0; i < dspRegistry.size(); i++) {
+            if(dspRegistry.get(i).dspclass == klass) {
+                dspRegistry.remove(i);
+                break;
+            }
+        }
     }
 
     /**
@@ -119,25 +147,24 @@ abstract public class DSPFactory
      * @return DSP object that can process this path
      * @throws DapException
      */
+
     synchronized public DSP
     create(String path)
-        throws DapException
+            throws DapException
     {
-        for(int i = 0;i < dspRegistry.size();i++) {
+        for(int i = 0; i < dspRegistry.size(); i++) {
             try {
-                Class testclass = dspRegistry.get(i);
-                Method match = testclass.getMethod("match", String.class, DapContext.class);
-                boolean ismatch = (Boolean) match.invoke(null, path, (DapContext) null);
+                Registration tester = dspRegistry.get(i);
+                boolean ismatch = (Boolean) tester.matcher.invoke(null, path, (DapContext) null);
                 if(ismatch) {
-                    DSP dsp = (DSP) testclass.newInstance();
+                    DSP dsp = (DSP) tester.dspclass.newInstance();
                     return dsp.open(path);
                 }
             } catch (Exception e) {
                 throw new DapException(e);
             }
-
         }
-        throw new IllegalArgumentException("Cannot open "+path);
+        throw new IllegalArgumentException("Cannot open " + path);
     }
 
 } // DSPFactory

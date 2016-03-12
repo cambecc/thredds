@@ -8,8 +8,11 @@ import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
 import dap4.dap4shared.DapLog;
 import dap4.dap4shared.FileDSP;
+import dap4.dap4shared.NetcdfDSP;
 import dap4.servlet.*;
+import ucar.httpservices.HTTPUtil;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -43,6 +46,7 @@ public class D4TSServlet extends DapController
             // Register known DSP classes: order is important.
             // Only used in server
             registerDSP(SynDSP.class, true);
+            registerDSP(NetcdfDSP.class, true);
             registerDSP(FileDSP.class, true);
         }
 
@@ -57,6 +61,8 @@ public class D4TSServlet extends DapController
     //////////////////////////////////////////////////
     // Instance variables
 
+    ServletContext cxt = null;
+
     //////////////////////////////////////////////////
     // Constructor(s)
 
@@ -69,6 +75,7 @@ public class D4TSServlet extends DapController
     public void initialize()
     {
         DapLog.info("Initializing d4ts servlet");
+        cxt = getServletContext();
     }
 
     //////////////////////////////////////////////////
@@ -136,8 +143,9 @@ public class D4TSServlet extends DapController
     {
         // Using context information, we need to
         // construct a file path to the specified dataset
-        String suffix = DapUtil.denullify(relativepath);
-        String datasetfilepath = drq.getResourcePath(TESTDATADIR + DapUtil.canonicalpath(suffix));
+        String suffix = DapUtil.denullify(HTTPUtil.canonicalpath(relativepath));
+        String datasetfilepath = TESTDATADIR + HTTPUtil.abspath(suffix);
+        datasetfilepath = cxt.getRealPath(datasetfilepath);
 
         // See if it really exists and is readable and of proper type
         File dataset = new File(datasetfilepath);

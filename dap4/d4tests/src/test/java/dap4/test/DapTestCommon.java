@@ -5,25 +5,10 @@
 
 package dap4.test;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringReader;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.EnumSet;
-import java.util.Set;
-
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
-import junit.framework.TestCase;
+import dap4.dap4shared.XURI;
+import dap4.servlet.DapController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -39,9 +24,16 @@ import ucar.nc2.dataset.DatasetUrl;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.unidata.test.util.TestDir;
 
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.EnumSet;
+import java.util.Set;
+
 @ContextConfiguration
 @WebAppConfiguration("file:src/test/data")
-public class DapTestCommon
+abstract public class DapTestCommon
 {
     private final static Logger logger = LoggerFactory.getLogger(DapTestCommon.class);
 
@@ -64,8 +56,8 @@ public class DapTestCommon
     static public final String CONSTRAINTTAG = "dap4.ce";
 
     // Equivalent to the path to the webapp/d4ts for testing purposes
-    static protected final String RESOURCEPATH = "/d4tests/src/test/data/resources";
-    static protected final String TESTFILES = "/d4tests/src/test/data/resources/testfiles";
+    static protected final String DFALTRESOURCEPATH = "/d4tests/src/test/data/resources";
+//    static protected final String TESTFILES = "/d4tests/src/test/data/resources/testfiles";
 
     //////////////////////////////////////////////////
     // Type decls
@@ -75,10 +67,11 @@ public class DapTestCommon
         public MockHttpServletRequest req = null;
         public MockHttpServletResponse resp = null;
         public MockServletContext context = null;
-        public Dap4Controller controller = null;
         public String url = null;
         public String servletname = null;
         public DapTestCommon parent = null;
+
+        public DapController controller = null;
 
         public Mocker(String servletname, String url, DapTestCommon parent)
                 throws Exception
@@ -86,21 +79,28 @@ public class DapTestCommon
             this.parent = parent;
             this.url = url;
             this.servletname = servletname;
-            String resdir = parent.getResourceDir();
+            String testdir = parent.getTestFilesDir();
             // There appears to be bug in the spring core.io code
             // such that it assumes absolute paths start with '/'.
             // So, check for windows drive and prepend 'file:/' as a hack.
-            if(System.getProperty("os.name").toLowerCase().startsWith("windows")
-                    && resdir.matches("[a-zA-Z][:].*"))
-                resdir = "/" + resdir;
-            resdir = "file:" + resdir;
-            this.context = new MockServletContext(resdir);
-            this.req = new MockHttpServletRequest(this.context, "GET", url);
+            if(DapUtil.hasDriveLetter(testdir))
+                testdir = "/" + testdir;
+            testdir = "file:" + testdir;
+            this.context = new MockServletContext(testdir);
+            URI u = HTTPUtil.parseToURI(url);
+            this.req = new MockHttpServletRequest(this.context, "GET", u.getPath());
             this.resp = new MockHttpServletResponse();
             req.setMethod("GET");
             setup();
             this.controller = new Dap4Controller();
             controller.init();
+        }
+
+        protected Mocker
+        setController(DapController ct)
+        {
+            this.controller = ct;
+            return this;
         }
 
         /**
@@ -110,44 +110,28 @@ public class DapTestCommon
          * Instead, it requires the user to so do.
          */
         protected void setup()
-                throws URISyntaxException
+                throws Exception
         {
             this.req.setCharacterEncoding("UTF-8");
-            this.req.setServletPath("/" + this.servletname);
-            URI url = HTTPUtil.parseToURI(this.url);
-            this.req.setProtocol(url.getScheme());
-            this.req.setQueryString(url.getQuery());
-            this.req.setServerName(url.getHost());
-            this.req.setServerPort(url.getPort());
-            String path = url.getPath();
-            if(path != null) {// probably more complex than it needs to be
-                String prefix = null;
-                String suffix = null;
-                String spiece = "/" + servletname;
-                if(path.equals(spiece) || path.equals(spiece + "/")) {
-                    // path is just spiece
-                    prefix = spiece;
-                    suffix = "/";
-                } else {
-                    String[] pieces = path.split(spiece + "/"); // try this first
-                    if(pieces.length == 1 && path.endsWith(spiece))
-                        pieces = path.split(spiece);  // try this
-                    switch (pieces.length) {
-                    case 0:
-                        throw new IllegalArgumentException("DapTestCommon");
-                    case 1:
-                        prefix = pieces[0] + spiece;
-                        suffix = "";
-                        break;
-                    default: // > 1
-                        prefix = pieces[0] + spiece;
-                        suffix = path.substring(prefix.length());
-                        break;
-                    }
-                }
-                this.req.setContextPath(prefix);
-                this.req.setPathInfo(suffix);
+            URI u = HTTPUtil.parseToURI(this.url);
+            this.req.setProtocol(u.getScheme());
+            this.req.setQueryString(u.getQuery());
+            this.req.setServerName(u.getHost());
+            this.req.setServerPort(u.getPort());
+            String path = u.getPath();
+            if(path == null) path = "/";
+            // Divide into contextpath + servletpath
+            String[] pieces = path.split("[/]");
+            int i;
+            for(i=0;i<pieces.length;i++) {
+                if(pieces[i].equals(this.servletname)) break;
             }
+            if(i == pieces.length)
+                throw new IllegalArgumentException("Bad mock uri path: "+path);
+            String cp = "/" + DapUtil.join(pieces,"/",0,i);
+            String sp = "/" + DapUtil.join(pieces,"/",i,pieces.length);
+            this.req.setContextPath(cp);
+            this.req.setServletPath(sp);
         }
 
         public byte[] execute()
@@ -268,11 +252,14 @@ public class DapTestCommon
     protected String threddsroot = null;
     protected String dap4root = null;
     protected String d4tsServer = null;
-    protected String resourcedir = null;
+    protected String testfilesdir = null;
 
     protected String title = "Testing";
 
-    public DapTestCommon() {this("DapTest");}
+    public DapTestCommon()
+    {
+        this("DapTest");
+    }
 
     public DapTestCommon(String name)
     {
@@ -291,7 +278,7 @@ public class DapTestCommon
         this.dap4root = locateDAP4Root(this.threddsroot);
         if(this.dap4root == null)
             System.err.println("Cannot locate /dap4 parent dir");
-        this.resourcedir = this.dap4root + RESOURCEPATH;
+        this.testfilesdir = this.dap4root + getTestFilesDir();
         // Compute the set of SOURCES
         this.d4tsServer = TestDir.dap4TestServer;
         if(DEBUG)
@@ -306,11 +293,11 @@ public class DapTestCommon
         String testargs = System.getProperty("testargs");
         if(testargs != null && testargs.length() > 0) {
             String[] pairs = testargs.split("[  ]*[,][  ]*");
-            for(String pair: pairs) {
+            for(String pair : pairs) {
                 String[] tuple = pair.split("[  ]*[=][  ]*");
                 String value = (tuple.length == 1 ? "" : tuple[1]);
                 if(tuple[0].length() > 0)
-                    System.setProperty(tuple[0],value);
+                    System.setProperty(tuple[0], value);
             }
         }
         if(System.getProperty("nodiff") != null)
@@ -333,16 +320,16 @@ public class DapTestCommon
     }
 
     //////////////////////////////////////////////////
+    // Abstract methods
+
+    abstract protected String getTestFilesDir();
+
+    //////////////////////////////////////////////////
     // Accessor
 
     public String getDAP4Root()
     {
         return this.dap4root;
-    }
-
-    public String getResourceDir()
-    {
-        return this.resourcedir;
     }
 
     public void setTitle(String title)

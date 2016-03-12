@@ -154,7 +154,7 @@ public class FrontPage
                 if(!absname.startsWith(this.root))
                     throw new DapException("Malformed file name: " + absname);
                 String datasetname = DapUtil.denullify(absname.substring(this.root.length()));
-                String urlpath = this.drq.getServer() + "/" + this.drq.getControllerPath() + datasetname; // append remainder not used by mappath
+                String urlpath = this.drq.getControllerPath() + datasetname; // append remainder not used by mappath
                 String line = String.format(HTML_FORMAT, name, urlpath, urlpath, urlpath, urlpath);
                 html.append(line);
             }

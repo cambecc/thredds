@@ -50,7 +50,7 @@ abstract public class DapUtil // Should only contain static methods
     static final public int CHECKSUMSIZE = 4; // bytes if CRC32
     static final public String DIGESTER = "CRC32";
 
-    static final public String DRIVELETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    static final public String DRIVELETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
     //////////////////////////////////////////////////
     // return last name part of an fqn; result will be escaped.
@@ -214,6 +214,7 @@ abstract public class DapUtil // Should only contain static methods
      * 1. use '/' consistently
      * 2. remove any trailing '/'
      * 3. trim blanks
+     * 4. Be aware of possible windows drive letter
      *
      * @param path convert this path
      * @return canonicalized version

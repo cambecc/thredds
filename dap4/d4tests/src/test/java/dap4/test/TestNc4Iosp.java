@@ -100,6 +100,12 @@ public class TestNc4Iosp extends DapTestCommon
         chooseTestcases();
     }
 
+    protected String
+    getTestFilesDir()
+    {
+         return "";
+    }
+
     //////////////////////////////////////////////////
     // Define test cases
 

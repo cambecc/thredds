@@ -24,6 +24,7 @@ public class Nc4Factory extends DefaultFactory
     //////////////////////////////////////////////////
 
     protected Stack<DapNode> scope = new Stack<>();
+    protected DapNode top() {return scope.empty() ? null : scope.peek();}
 
     // Collect all created nodes
     protected List<DapNode> allnodes = new ArrayList<>();
@@ -84,7 +85,7 @@ public class Nc4Factory extends DefaultFactory
     protected DapNode
     tag(DapNode annotatednode, int id)
     {
-        DapNode parent = (scope.empty() ? null : scope.peek());
+        DapNode parent = top();
         int gid = (parent == null ? -1
                 : ((NetcdfDSP.Nc4ID) parent.annotation(NC4DSPKEY)).gid);
         NetcdfDSP.Nc4ID nid = new NetcdfDSP.Nc4ID(gid, id);
@@ -136,12 +137,12 @@ public class Nc4Factory extends DefaultFactory
 
     public DapDimension newDimension(String name, long size, int id)
     {
-        return (DapDimension) tag(scope.peek(), super.newDimension(name, size), id);
+        return (DapDimension) tag(top(), super.newDimension(name, size), id);
     }
 
     public DapMap newMap(DapVariable target, int id)
     {
-        return (DapMap) tag(scope.peek(), super.newMap(target), id);
+        return (DapMap) tag(top(), super.newMap(target), id);
     }
 
     public DapVariable newAtomicVariable(String name, DapType t, int id)
@@ -151,37 +152,37 @@ public class Nc4Factory extends DefaultFactory
 
     public DapVariable newVariable(String name, DapType t, int id)
     {
-        return (DapVariable) tag(scope.peek(), super.newVariable(name, t), id);
+        return (DapVariable) tag(top(), super.newVariable(name, t), id);
     }
 
     public DapGroup newGroup(String name, int id)
     {
-        return (DapGroup) tag(scope.peek(), super.newGroup(name), id);
+        return (DapGroup) tag(top(), super.newGroup(name), id);
     }
 
     public DapDataset newDataset(String name, int id)
     {
-        return (DapDataset) tag(scope.peek(), super.newDataset(name), id);
+        return (DapDataset) tag(top(), super.newDataset(name), id);
     }
 
     public DapEnumeration newEnumeration(String name, DapType basetype, int id)
     {
-        return (DapEnumeration) tag(scope.peek(), super.newEnumeration(name, basetype), id);
+        return (DapEnumeration) tag(top(), super.newEnumeration(name, basetype), id);
     }
 
     public DapEnumConst newEnumConst(String name, long value, int id)
     {
-        return (DapEnumConst) tag(scope.peek(), super.newEnumConst(name, value), id);
+        return (DapEnumConst) tag(top(), super.newEnumConst(name, value), id);
     }
 
     public DapStructure newStructure(String name, int id)
     {
-        return (DapStructure) tag(scope.peek(), super.newStructure(name), id);
+        return (DapStructure) tag(top(), super.newStructure(name), id);
     }
 
     public DapSequence newSequence(String name, int id)
     {
-        return (DapSequence) tag(scope.peek(), super.newSequence(name), id);
+        return (DapSequence) tag(top(), super.newSequence(name), id);
     }
 
 }

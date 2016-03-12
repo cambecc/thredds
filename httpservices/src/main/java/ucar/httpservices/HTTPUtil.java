@@ -433,4 +433,32 @@ abstract public class HTTPUtil
             path = path.substring(0, path.length() - 1);
         return path;
     }
+
+    /**
+     * Convert path to remove any leading '/'; assumes canonical.
+     *
+     * @param path convert this path
+     * @return relatived version
+     */
+    static public String relpath(String path)
+    {
+        if(path == null) return null;
+        if(path.startsWith("/"))
+            path = path.substring(1);
+        return path;
+    }
+
+    /**
+     * Convert path to add a  leading '/'; assumes canonical.
+     *
+     * @param path convert this path
+     * @return absolute version
+     */
+    static public String abspath(String path)
+    {
+        if(path == null) return "/";
+        if(!path.startsWith("/"))
+            path = "/" + path;
+        return path;
+    }
 }

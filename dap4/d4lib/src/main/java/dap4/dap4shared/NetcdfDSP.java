@@ -19,10 +19,10 @@ import dap4.core.util.DapContext;
 import dap4.core.util.DapException;
 import dap4.core.util.DapSort;
 import dap4.core.util.DapUtil;
-import dap4.dap4shared.DapLog;
 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +38,8 @@ public class NetcdfDSP extends AbstractDSP
 
     static public final boolean DEBUG = false;
 
+    static protected String[] EXTENSIONS = new String[]{".nc",".hdf5"};
+
     // Define reserved attributes
     static public final String UCARTAGVLEN = "^edu.ucar.isvlen";
     static public final String UCARTAGOPAQUE = "^edu.ucar.opaque.size";
@@ -45,7 +47,6 @@ public class NetcdfDSP extends AbstractDSP
 
     // Annotation name for all nodes
     static public final int NC4DSPNODES = "NC4DSPNODES".hashCode();
-
 
     static protected final Pointer NC_NULL = Pointer.NULL;
     static protected final int NC_FALSE = 0;
@@ -265,6 +266,7 @@ public class NetcdfDSP extends AbstractDSP
         this.factory = new Nc4Factory();
     }
 
+    @Override
     public void close()
             throws DapException
     {
@@ -275,6 +277,21 @@ public class NetcdfDSP extends AbstractDSP
         closed = true;
         if(trace)
             System.out.printf("Nc4DSP: closed: %s%n", path);
+    }
+
+    /**
+     * A path is file if it has no base protocol or is file:
+     *
+     * @param path
+     * @param context Any parameters that may help to decide.
+     * @return true if this path appears to be processible by this DSP
+     */
+    static public boolean match(String path, DapContext context)
+    {
+        for(String s: EXTENSIONS) {
+            if(path.endsWith(s)) return true;
+        }
+            return false;
     }
 
     @Override
@@ -410,9 +427,14 @@ public class NetcdfDSP extends AbstractDSP
         IntByReference ip = new IntByReference();
         errcheck(ret = nc4.nc_inq_unlimdims(gid, ip, NC_NULL));
         n = ip.getValue();
-        Memory mem = new Memory(NC_INT_BYTES * n);
-        errcheck(ret = nc4.nc_inq_unlimdims(gid, ip, mem));
-        int[] dimids = mem.getIntArray(0, n);
+        int[] dimids;
+        if(n == 0)
+            dimids = new int[0];
+        else {
+            Memory mem = new Memory(NC_INT_BYTES * n);
+            errcheck(ret = nc4.nc_inq_unlimdims(gid, ip, mem));
+            dimids = mem.getIntArray(0, n);
+        }
         return dimids;
     }
 

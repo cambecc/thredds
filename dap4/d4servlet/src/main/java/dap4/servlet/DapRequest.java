@@ -5,7 +5,6 @@ package dap4.servlet;
 
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
-import dap4.core.util.Escape;
 import dap4.core.util.ResponseFormat;
 import dap4.dap4shared.DapLog;
 import dap4.dap4shared.RequestMode;
@@ -15,10 +14,8 @@ import ucar.httpservices.HTTPUtil;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
@@ -131,16 +128,23 @@ public class DapRequest
             buf.append(port);
         }
         this.server = buf.toString();
-        buf.append(request.getContextPath());
-        buf.append("/");
+
+        // There appears to be some inconsistency in how the url path is divided up
+        // depending on if this is a spring controller vs a raw servlet.
+        // Try to canonicalize so that context path always ends with id
+        // and servletpath does not start with it.
         String id = controller.getServletID();
-        buf.append(id);
+        String sp = DapUtil.canonicalpath(request.getServletPath());
+        String cp = DapUtil.canonicalpath(request.getContextPath());
+        if(!cp.endsWith(id)) // probably spring ; contextpath does not ends with id
+            cp = cp + "/" + id;
+        buf.append(cp);
         this.controllerpath = buf.toString();
-        String sp = request.getServletPath();
-        assert sp.substring(1).startsWith(id);
-        this.datasetpath = sp.substring(1+id.length());
-        if(this.datasetpath.startsWith("/"))
-            this.datasetpath = this.datasetpath.substring(1,this.datasetpath.length());
+        sp = HTTPUtil.relpath(sp);
+        if(sp.startsWith(id)) // probably spring also
+            sp = sp.substring(id.length());
+
+        this.datasetpath = HTTPUtil.relpath(sp);
         this.datasetpath = DapUtil.nullify(this.datasetpath);
 
         this.mode = null;
@@ -184,7 +188,7 @@ public class DapRequest
         // Parse the query string into a Map
 
         if(querystring != null && querystring.length() > 0)
-        this.queries = xuri.getFields();
+            this.queries = xuri.getFields();
         if(DEBUG) {
             DapLog.debug("DapRequest: controllerpath =" + this.controllerpath);
             DapLog.debug("DapRequest: extension=" + (this.mode == null ? "null" : this.mode.extension()));
@@ -277,7 +281,7 @@ public class DapRequest
     public String getResourcePath(String relpath)
             throws IOException
     {
-        return controller.getResourcePath(this,relpath);
+        return controller.getResourcePath(this, relpath);
     }
 
     public String getDatasetPath()

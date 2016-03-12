@@ -118,6 +118,12 @@ public class TestFilters extends DapTestCommon
         }
     }
 
+    protected String
+    getTestFilesDir()
+    {
+        return TESTINPUTDIR;
+    }
+
     //////////////////////////////////////////////////
     // Instance variables
 

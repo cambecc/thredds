@@ -91,6 +91,12 @@ public class TestH5Iosp extends DapTestCommon {
         chooseTestcases();
     }
 
+    protected String
+       getTestFilesDir()
+       {
+           return TESTINPUTDIR;
+       }
+
     //////////////////////////////////////////////////
     // Define test cases
 

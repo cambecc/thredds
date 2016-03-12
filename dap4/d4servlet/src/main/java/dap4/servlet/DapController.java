@@ -18,6 +18,7 @@ import dap4.dap4shared.DSP;
 import dap4.dap4shared.DapLog;
 import dap4.dap4shared.DapProtocol;
 import dap4.dap4shared.RequestMode;
+import dap4.servlet.DapRequest;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -196,18 +197,12 @@ abstract public class DapController extends HttpServlet
         if(this.servletcontext == null)
             this.servletcontext = req.getServletContext();
         DapRequest drq = getRequestState(req, res);
-        String url = req.getRequestURI().toString(); // warning: do not use getRequestURL
-        String query = req.getQueryString();
+        String url = drq.getOriginalURL();
         StringBuilder info = new StringBuilder("doGet():");
         info.append(" dataset = ");
         info.append(this.resourcepath);
         info.append(" url = ");
         info.append(url);
-        if(query != null && query.length() >= 0) {
-            info.append("?");
-            info.append(query);
-            DapLog.debug(info.toString());
-        }
         if(DEBUG) {
             System.err.println("DAP4 Servlet: processing url: " + drq.getOriginalURL());
         }

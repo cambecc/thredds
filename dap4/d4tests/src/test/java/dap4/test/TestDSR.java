@@ -42,6 +42,12 @@ public class TestDSR extends DapTestCommon
         this.datasetpath = this.root + "/" + DATADIR;
     }
 
+    protected String
+       getTestFilesDir()
+       {
+           return DATADir;
+       }
+
     //////////////////////////////////////////////////
     // Junit test methods
 
