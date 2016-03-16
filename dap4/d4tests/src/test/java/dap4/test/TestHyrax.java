@@ -1,5 +1,6 @@
 package dap4.test;
 
+import dap4.core.util.DapUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +31,7 @@ public class TestHyrax extends DapTestCommon
     //////////////////////////////////////////////////
     // Constants
 
-    static final String DATADIR = "d4tests/src/test/data"; // relative to dap4 root
+    static final String DATADIR = "src/test/data"; // relative to dap4 root
     static final String TESTDATADIR = DATADIR + "/resources/TestHyrax";
     static final String BASELINEDIR = TESTDATADIR + "/baseline";
 
@@ -40,7 +41,7 @@ public class TestHyrax extends DapTestCommon
     // Order is important; testing reachability is in the order
     // listed
     static final String[] SOURCES = new String[]{
-        "hyrax",
+            "hyrax",
             "http://" + IP + ".compute-1.amazonaws.com:8080/opendap/data/reader/dap4/dap4.html",
             "dap4://" + IP + ".compute-1.amazonaws.com:8080/opendap/data/reader/dap4"
     };
@@ -102,7 +103,7 @@ public class TestHyrax extends DapTestCommon
             this.id = id;
             this.constraint = (constraint.length() == 0 ? null : constraint);
             this.baselinepath
-                = root + "/" + BASELINEDIR + "/" + dataset;
+                    = root + "/" + BASELINEDIR + "/" + dataset;
             if(this.constraint != null)
                 this.baselinepath += ("." + String.valueOf(this.id));
         }
@@ -147,7 +148,7 @@ public class TestHyrax extends DapTestCommon
     List<ClientTest> alltestcases = new ArrayList<ClientTest>();
     List<ClientTest> chosentests = new ArrayList<ClientTest>();
 
-    String root = null;
+    String testroot = null;
     String datasetpath = null;
 
     String sourceurl = null;
@@ -155,14 +156,12 @@ public class TestHyrax extends DapTestCommon
     //////////////////////////////////////////////////
 
     @Before
-    public void setup() throws Exception {
-        this.root = getDAP4Root();
-        if(this.root == null)
-            throw new Exception("dap4 root cannot be located");
-        if(this.root.charAt(0) != '/')
-            this.root = "/" + this.root; // handle problem of windows paths
+    public void setup() throws Exception
+    {
+        this.testroot = getTestInputFilesDir();
+        this.testroot = DapUtil.absolutize(this.testroot); // handle problem of windows paths
         System.out.println("Using source url " + this.sourceurl);
-        defineAllTestcases(this.root, this.sourceurl);
+        defineAllTestcases(this.testroot, this.sourceurl);
         chooseTestcases();
     }
 
@@ -175,8 +174,9 @@ public class TestHyrax extends DapTestCommon
         if(false) {
             chosentests = locate("dmr-testsuite/test_array_7.xml");
         } else {
-            for(ClientTest tc : alltestcases)
+            for(ClientTest tc : alltestcases) {
                 chosentests.add(tc);
+            }
         }
     }
 
@@ -190,7 +190,8 @@ public class TestHyrax extends DapTestCommon
         ClientTest.server = server;
         if(false) {
             alltestcases.add(new ClientTest(1, "D4-xml/DMR_4.xml", "b1"));
-        }if(false) {
+        }
+        if(false) {
             alltestcases.add(new ClientTest("test_simple_1.dmr"));
             //deleted: alltestcases.add(new ClientTest("dmr-testsuite/testall.xml"));
         }
@@ -265,9 +266,9 @@ public class TestHyrax extends DapTestCommon
 
     @Test
     public void testHyrax()
-        throws Exception
+            throws Exception
     {
-	org.junit.Assume.assumeTrue(usingIntellij);
+        org.junit.Assume.assumeTrue(usingIntellij);
         boolean pass = true;
         for(ClientTest testcase : chosentests) {
             if(!doOneTest(testcase)) pass = false;
@@ -279,7 +280,7 @@ public class TestHyrax extends DapTestCommon
     // Primary test method
     boolean
     doOneTest(ClientTest testcase)
-        throws Exception
+            throws Exception
     {
         boolean pass = true;
         System.out.println("Testcase: " + testcase.dataset);
@@ -293,14 +294,14 @@ public class TestHyrax extends DapTestCommon
             return testcase.xfail;
         }
 
-        String metadata = (NCDUMP ? ncdumpmetadata(ncfile):null);
+        String metadata = (NCDUMP ? ncdumpmetadata(ncfile) : null);
         if(prop_visual) {
             visual(testcase.title + ".dmr", metadata);
         }
 
         String data = null;
         if(!testcase.headeronly) {
-            data = (NCDUMP ? ncdumpdata(ncfile):null);
+            data = (NCDUMP ? ncdumpdata(ncfile) : null);
             if(prop_visual) {
                 visual(testcase.title + ".dap", data);
             }
@@ -325,7 +326,7 @@ public class TestHyrax extends DapTestCommon
 
 
     String ncdumpmetadata(NetcdfDataset ncfile)
-        throws Exception
+            throws Exception
     {
         StringWriter sw = new StringWriter();
         // Print the meta-databuffer using these args to NcdumpW
@@ -340,7 +341,7 @@ public class TestHyrax extends DapTestCommon
     }
 
     String ncdumpdata(NetcdfDataset ncfile)
-        throws Exception
+            throws Exception
     {
         StringWriter sw = new StringWriter();
         // Dump the databuffer

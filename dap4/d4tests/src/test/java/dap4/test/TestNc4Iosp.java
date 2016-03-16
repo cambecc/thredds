@@ -27,7 +27,7 @@ public class TestNc4Iosp extends DapTestCommon
     //////////////////////////////////////////////////
     // Constants
 
-    static protected String DATADIR = "d4tests/src/test/data"; // relative to dap4 root
+    static protected String DATADIR = "src/test/data"; // relative to dap4 root
     static protected String TESTDATADIR = DATADIR + "/resources/";
     static protected String BASELINEDIR = DATADIR + "/resources/TestIosp/baseline";
     static protected String TESTINPUTDIR = DATADIR + "/resources/testfiles";
@@ -40,7 +40,7 @@ public class TestNc4Iosp extends DapTestCommon
 
     static protected class Nc4IospTest
     {
-        static String root = null;
+        static String testinputroot = null;
         String title;
         String dataset;
         String testinputpath;
@@ -51,9 +51,9 @@ public class TestNc4Iosp extends DapTestCommon
             this.title = dataset;
             this.dataset = dataset;
             this.testinputpath
-                = root + "/" + TESTINPUTDIR + "/" + dataset;
+                = testinputroot + "/" + TESTINPUTDIR + "/" + dataset;
             this.baselinepath
-                = root + "/" + BASELINEDIR + "/" + dataset + ".nc4";
+                = testinputroot + "/" + BASELINEDIR + "/" + dataset + ".nc4";
         }
 
         public String toString()
@@ -89,10 +89,8 @@ public class TestNc4Iosp extends DapTestCommon
         if(!HDF5) {
             CDMDSP.loadNc4Iosp();  // Load Nc4Iosp
         }
-        this.root = getDAP4Root();
-        if(this.root == null)
-            throw new Exception("dap4 root not found");
-        Nc4IospTest.root = root;
+        this.root = getTestInputFilesDir();
+        Nc4IospTest.testinputroot = root;
         File f = new File(root + "/" + BASELINEDIR);
         if(!f.exists()) f.mkdir();
         this.datasetpath = this.root + "/" + DATADIR;

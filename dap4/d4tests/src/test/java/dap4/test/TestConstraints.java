@@ -30,7 +30,7 @@ public class TestConstraints extends DapTestCommon
     //////////////////////////////////////////////////
     // Constants
 
-    static final String DATADIR = "d4tests/src/test/data"; // relative to dap4 root
+    static final String DATADIR = "src/test/data"; // relative to dap4 root
     static final String TESTDATADIR = DATADIR + "/resources/TestCDMClient";
     static final String BASELINEDIR = TESTDATADIR + "/baseline";
     static final String TESTINPUTDIR = TESTDATADIR + "/testinput";
@@ -90,7 +90,7 @@ public class TestConstraints extends DapTestCommon
     List<ClientTest> alltestcases = new ArrayList<ClientTest>();
     List<ClientTest> chosentests = new ArrayList<ClientTest>();
 
-    String root = null;
+    String testroot = null;
     String datasetpath = null;
 
     String sourceurl = null;
@@ -99,18 +99,16 @@ public class TestConstraints extends DapTestCommon
 
     @Before
     public void setup() throws Exception {
-        this.root = getDAP4Root();
-        if(this.root == null)
-            throw new Exception("dap4 root cannot be located");
+        this.testroot = getTestInputFilesDir();
         // Check for windows path
-        if(alpha.indexOf(this.root.charAt(0)) >= 0 && this.root.charAt(1) == ':') {
-        } else if(this.root.charAt(0) != '/')
-            this.root = "/" + this.root;
-        this.datasetpath = this.root + "/" + TESTINPUTDIR;
+        if(alpha.indexOf(this.testroot.charAt(0)) >= 0 && this.testroot.charAt(1) == ':') {
+        } else if(this.testroot.charAt(0) != '/')
+            this.testroot = "/" + this.testroot;
+        this.datasetpath = this.testroot + "/" + TESTINPUTDIR;
         findServer(this.datasetpath);
         this.sourceurl = d4tsServer;
         System.out.println("Using source url " + this.sourceurl);
-        defineAllTestcases(this.root, this.sourceurl);
+        defineAllTestcases(this.testroot, this.sourceurl);
         chooseTestcases();
         if(DMRPARSEDEBUG) Dap4Parser.setGlobalDebugLevel(1);
         if(CEPARSEDEBUG) CEParser.setGlobalDebugLevel(1);

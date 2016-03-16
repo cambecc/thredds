@@ -25,11 +25,11 @@ public class TestParserDMR extends DapTestCommon
     //////////////////////////////////////////////////
     // Constants
 
-    static protected final String DIR1 = "d4tests/src/test/data/resources/TestParsers/testinput"; // relative to dap4 root
-    static protected final String DIR2 = "d4tests/src/test/data/resources/TestServlet/baseline"; // relative to dap4 root
-    static protected final String DIR3 = "d4tests/src/test/data/resources/TestParsers/dmrset"; // relative to dap4  root
+    static protected final String DIR1 = "src/test/data/resources/TestParsers/testinput"; // relative to dap4 root
+    static protected final String DIR2 = "src/test/data/resources/TestServlet/baseline"; // relative to dap4 root
+    static protected final String DIR3 = "src/test/data/resources/TestParsers/dmrset"; // relative to dap4  root
 
-    static protected final String BASELINEDIR = "d4tests/src/test/data/resources/TestParsers/baseline";
+    static protected final String BASELINEDIR = "src/test/data/resources/TestParsers/baseline";
 
     //////////////////////////////////////////////////
 
@@ -93,9 +93,9 @@ public class TestParserDMR extends DapTestCommon
 
     protected void defineTestCases()
     {
-        String dirpath1 = getDAP4Root() + "/" + DIR1;
-        String dirpath2 = getDAP4Root() + "/" + DIR2;
-        String dirpath3 = getDAP4Root() + "/" + DIR3;
+        String dirpath1 = getTestInputFilesDir() + "/" + DIR1;
+        String dirpath2 = getTestInputFilesDir() + "/" + DIR2;
+        String dirpath3 = getTestInputFilesDir() + "/" + DIR3;
 
         if (false) {
             alltestcases.add(new TestCase(dirpath1, "test_simple_1", "xml"));
@@ -178,7 +178,7 @@ public class TestParserDMR extends DapTestCommon
         int i, c;
 
         String testinput = testcase.dir + "/" + testcase.name + "." + testcase.ext;
-        String baseline = getDAP4Root() + "/" + BASELINEDIR + "/" + testcase.name + ".dmp";
+        String baseline = getTestInputFilesDir() + "/" + BASELINEDIR + "/" + testcase.name + ".dmp";
 
         System.out.println("Testcase: " + testinput); System.out.flush();
 

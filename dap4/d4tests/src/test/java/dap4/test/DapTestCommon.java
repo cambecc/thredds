@@ -2,7 +2,6 @@
    See the LICENSE file for more information.
 */
 
-
 package dap4.test;
 
 import dap4.core.util.DapException;
@@ -55,10 +54,10 @@ abstract public class DapTestCommon
 
     static public final String CONSTRAINTTAG = "dap4.ce";
 
-    // Equivalent to the path to the webapp/d4ts for testing purposes
-    static protected final String DFALTRESOURCEPATH = "/d4tests/src/test/data/resources";
-//    static protected final String TESTFILES = "/d4tests/src/test/data/resources/testfiles";
+    static final String D4TESTDIRNAME = "d4tests";
 
+    // Equivalent to the path to the webapp/d4ts for testing purposes
+    static protected final String DFALTRESOURCEPATH = "/src/test/data/resources";
     //////////////////////////////////////////////////
     // Type decls
 
@@ -79,7 +78,7 @@ abstract public class DapTestCommon
             this.parent = parent;
             this.url = url;
             this.servletname = servletname;
-            String testdir = parent.getTestFilesDir();
+            String testdir = parent.getTestInputFilesDir();
             // There appears to be bug in the spring core.io code
             // such that it assumes absolute paths start with '/'.
             // So, check for windows drive and prepend 'file:/' as a hack.
@@ -250,7 +249,7 @@ abstract public class DapTestCommon
 
     // Define a tree pattern to recognize the root.
     protected String threddsroot = null;
-    protected String dap4root = null;
+    protected String dap4testroot = null;
     protected String d4tsServer = null;
     protected String testfilesdir = null;
 
@@ -275,10 +274,10 @@ abstract public class DapTestCommon
         this.threddsroot = locateThreddsRoot();
         if(this.threddsroot == null)
             System.err.println("Cannot locate /thredds parent dir");
-        this.dap4root = locateDAP4Root(this.threddsroot);
-        if(this.dap4root == null)
+        String dap4root = locateDAP4Root(this.threddsroot);
+        if(dap4root == null)
             System.err.println("Cannot locate /dap4 parent dir");
-        this.testfilesdir = this.dap4root + getTestFilesDir();
+        this.testfilesdir = dap4root + D4TESTDIRNAME;
         // Compute the set of SOURCES
         this.d4tsServer = TestDir.dap4TestServer;
         if(DEBUG)
@@ -320,17 +319,15 @@ abstract public class DapTestCommon
     }
 
     //////////////////////////////////////////////////
-    // Abstract methods
+    // Overrideable methods
 
-    abstract protected String getTestFilesDir();
+    protected String getTestInputFilesDir()
+    {
+         return this.testfilesdir;
+    }
 
     //////////////////////////////////////////////////
     // Accessor
-
-    public String getDAP4Root()
-    {
-        return this.dap4root;
-    }
 
     public void setTitle(String title)
     {

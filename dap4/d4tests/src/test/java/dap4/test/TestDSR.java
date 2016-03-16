@@ -17,7 +17,7 @@ public class TestDSR extends DapTestCommon
     //////////////////////////////////////////////////
     // Constants
 
-    static protected String DATADIR = "d4tests/src/test/data"; // relative to dap4 root
+    static protected String DATADIR = "src/test/data"; // relative to d4tests root
     static protected String TESTDATADIR = DATADIR + "/resources/";
     static protected String BASELINEDIR = DATADIR + "/resources/TestDSR/baseline";
 
@@ -30,22 +30,20 @@ public class TestDSR extends DapTestCommon
 
     protected String datasetpath = null;
 
-    protected String root = null;
+    protected String testroot = null;
 
     //////////////////////////////////////////////////
 
     @Before
     public void setup() throws Exception {
-        this.root = getDAP4Root();
-        if(this.root == null)
-            throw new Exception("dap4 root not found");
-        this.datasetpath = this.root + "/" + DATADIR;
+        this.testroot = getTestFilesDir();
+        this.datasetpath = this.testroot + "/" + DATADIR;
     }
 
     protected String
        getTestFilesDir()
        {
-           return DATADir;
+           return DATADIR;
        }
 
     //////////////////////////////////////////////////
@@ -76,7 +74,7 @@ public class TestDSR extends DapTestCommon
             visual("TestDSR", dsr);
 
         // Figure out the baseline
-        String baselinepath = this.root + "/" + BASELINEDIR + "/" + FAKEDATASET + ".dsr";
+        String baselinepath = this.testroot + "/" + BASELINEDIR + "/" + FAKEDATASET + ".dsr";
 
         if(prop_baseline) {
             writefile(baselinepath, dsr);

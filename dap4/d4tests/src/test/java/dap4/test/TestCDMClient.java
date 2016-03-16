@@ -31,7 +31,7 @@ public class TestCDMClient extends DapTestCommon
     //////////////////////////////////////////////////
     // Constants
 
-    static final String DATADIR = "d4tests/src/test/data"; // relative to dap4 root
+    static final String DATADIR = "src/test/data"; // relative to dap4 root
     static final String TESTDATADIR = DATADIR + "/resources/TestCDMClient";
     static final String BASELINEDIR = TESTDATADIR + "/baseline";
     static final String TESTINPUTDIR = TESTDATADIR + "/testinput";
@@ -139,7 +139,7 @@ public class TestCDMClient extends DapTestCommon
     List<ClientTest> alltestcases = new ArrayList<ClientTest>();
     List<ClientTest> chosentests = new ArrayList<ClientTest>();
 
-    String root = null;
+    String testroot = null;
     String datasetpath = null;
 
     String sourceurl = null;
@@ -147,18 +147,16 @@ public class TestCDMClient extends DapTestCommon
     //////////////////////////////////////////////////
 
     @Before
-    public void setup() throws Exception {
+    public void setup() throws Exception
+    {
         DapCache.flush();
-        this.root = getDAP4Root();
-        if(this.root == null)
-            throw new Exception("dap4 root cannot be located");
-        if(this.root.charAt(0) != '/' && !DapUtil.hasDriveLetter(this.root))
-            this.root = "/" + this.root; // handle problem of windows paths
-        this.datasetpath = this.root + "/" + TESTINPUTDIR;
+        this.testroot = getTestInputFilesDir();
+        this.testroot = DapUtil.absolutize(this.testroot); // handle problem of windows paths
+        this.datasetpath = this.testroot + "/" + TESTINPUTDIR;
         findServer(this.datasetpath);
         this.sourceurl = d4tsServer;
         System.out.println("Using source url " + this.sourceurl);
-        defineAllTestcases(this.root, this.sourceurl);
+        defineAllTestcases(this.testroot, this.sourceurl);
         chooseTestcases();
     }
 

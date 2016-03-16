@@ -157,9 +157,9 @@ public class TestD4TS extends DapTestCommon
     {
         if(prop_ascii)
             Generator.setASCII(true);
-        ServletTest.setRoots(canonjoin(getResourceDir(), TESTINPUTDIR),
-                canonjoin(getResourceDir(), BASELINEDIR),
-                canonjoin(getResourceDir(), GENERATEDIR));
+        ServletTest.setRoots(canonjoin(getTestInputFilesDir(), TESTINPUTDIR),
+                canonjoin(getTestInputFilesDir(), BASELINEDIR),
+                canonjoin(getTestInputFilesDir(), GENERATEDIR));
         defineAllTestcases();
         chooseTestcases();
     }

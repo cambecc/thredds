@@ -26,7 +26,7 @@ public class TestParserCE extends DapTestCommon
     // Constants
     static final boolean DMRPARSEDEBUG = false;
     static final boolean CEPARSEDEBUG = false;
-    static final String TESTCASEDIR = "d4tests/src/test/data/resources/TestParsers"; // relative to dap4 root
+    static final String TESTCASEDIR = "src/test/data/resources/TestParsers"; // relative to dap4 root
 
     //////////////////////////////////////////////////
     // Type decls

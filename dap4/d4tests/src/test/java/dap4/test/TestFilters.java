@@ -26,7 +26,7 @@ public class TestFilters extends DapTestCommon
     //////////////////////////////////////////////////
     // Constants
 
-    static String DATADIR = "d4tests/src/test/data"; // relative to dap4 root
+    static String DATADIR = "src/test/data"; // relative to dap4 root
     static String TESTDATADIR = DATADIR + "/resources/";
     static String BASELINEDIR = DATADIR + "/resources/TestFilters/baseline";
     static String TESTINPUTDIR = DATADIR + "/resources/testfiles";
@@ -138,17 +138,15 @@ public class TestFilters extends DapTestCommon
 
     String datasetpath = null;
 
-    String root = null;
+    String testroot = null;
 
     //////////////////////////////////////////////////
 
     @Before
     public void setup() throws Exception {
-        this.root = getDAP4Root();
-        if(this.root == null)
-            throw new Exception("dap4 root not found");
-        this.datasetpath = this.root + "/" + DATADIR;
-        defineAllTestcases(this.root);
+        this.testroot = getTestFilesDir();
+        this.datasetpath = this.testroot + "/" + DATADIR;
+        defineAllTestcases(this.testroot);
         chooseTestcases();
     }
 
