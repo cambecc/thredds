@@ -106,7 +106,7 @@ public class TestSerial extends DapTestCommon
 
     @Before
     public void setup() throws Exception {
-        this.testroot = getTestInputFilesDir();
+        this.testroot = getD4TestsRoot();
         // Check for windows path
         if(!DapUtil.hasDriveLetter(this.testroot))
             this.testroot = DapUtil.absolutize(this.testroot);

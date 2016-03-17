@@ -6,7 +6,6 @@ package dap4.test;
 
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
-import dap4.dap4shared.XURI;
 import dap4.servlet.DapController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +24,6 @@ import ucar.unidata.test.util.TestDir;
 
 import java.io.*;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.EnumSet;
 import java.util.Set;
@@ -78,7 +76,7 @@ abstract public class DapTestCommon
             this.parent = parent;
             this.url = url;
             this.servletname = servletname;
-            String testdir = parent.getTestInputFilesDir();
+            String testdir = parent.getResourceRoot();
             // There appears to be bug in the spring core.io code
             // such that it assumes absolute paths start with '/'.
             // So, check for windows drive and prepend 'file:/' as a hack.
@@ -99,6 +97,7 @@ abstract public class DapTestCommon
         setController(DapController ct)
         {
             this.controller = ct;
+            this.controller.TESTING = true;
             return this;
         }
 
@@ -251,7 +250,6 @@ abstract public class DapTestCommon
     protected String threddsroot = null;
     protected String dap4testroot = null;
     protected String d4tsServer = null;
-    protected String testfilesdir = null;
 
     protected String title = "Testing";
 
@@ -277,7 +275,7 @@ abstract public class DapTestCommon
         String dap4root = locateDAP4Root(this.threddsroot);
         if(dap4root == null)
             System.err.println("Cannot locate /dap4 parent dir");
-        this.testfilesdir = dap4root + D4TESTDIRNAME;
+        this.dap4testroot = dap4root + "/" + D4TESTDIRNAME;
         // Compute the set of SOURCES
         this.d4tsServer = TestDir.dap4TestServer;
         if(DEBUG)
@@ -318,12 +316,18 @@ abstract public class DapTestCommon
         prop_controls = System.getProperty("controls", "");
     }
 
+
     //////////////////////////////////////////////////
     // Overrideable methods
 
-    protected String getTestInputFilesDir()
+    protected String getD4TestsRoot()
     {
-         return this.testfilesdir;
+         return this.dap4testroot;
+    }
+
+    protected String getResourceRoot()
+    {
+        return getD4TestsRoot() + DFALTRESOURCEPATH;
     }
 
     //////////////////////////////////////////////////

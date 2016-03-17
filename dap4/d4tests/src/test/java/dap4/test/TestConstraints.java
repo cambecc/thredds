@@ -99,7 +99,7 @@ public class TestConstraints extends DapTestCommon
 
     @Before
     public void setup() throws Exception {
-        this.testroot = getTestInputFilesDir();
+        this.testroot = getD4TestsRoot();
         // Check for windows path
         if(alpha.indexOf(this.testroot.charAt(0)) >= 0 && this.testroot.charAt(1) == ':') {
         } else if(this.testroot.charAt(0) != '/')

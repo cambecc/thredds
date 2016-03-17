@@ -69,6 +69,8 @@ abstract public class DapController extends HttpServlet
 
     static protected long binarywritelimit = ChunkWriter.DEFAULTWRITELIMIT;
 
+    static public boolean TESTING = true;
+
     //////////////////////////////////////////////////
     // Static accessors
 

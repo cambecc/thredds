@@ -37,7 +37,7 @@ public class TestFrontPage extends DapTestCommon
 
     @Before
     public void setup() throws Exception {
-        this.testroot = getTestInputFilesDir();
+        this.testroot = getD4TestsRoot();
         this.datasetpath = this.testroot + "/" + DATADIR;
     }
 

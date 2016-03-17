@@ -145,9 +145,9 @@ public class TestServletConstraints extends DapTestCommon
 
     @Before
     public void setup() {
-        ConstraintTest.setRoots(canonjoin(getTestInputFilesDir(), TESTINPUTDIR),
-                canonjoin(getTestInputFilesDir(), BASELINEDIR),
-                canonjoin(getTestInputFilesDir(), GENERATEDIR));
+        ConstraintTest.setRoots(canonjoin(getD4TestsRoot(), TESTINPUTDIR),
+                canonjoin(getD4TestsRoot(), BASELINEDIR),
+                canonjoin(getD4TestsRoot(), GENERATEDIR));
         defineAllTestcases();
         chooseTestcases();
     }

@@ -44,6 +44,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import thredds.core.TdsRequestedDataset;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -147,8 +148,15 @@ public class Dap4Controller extends DapController
     getResourcePath(DapRequest drq, String relpath)
             throws IOException
     {
-        File realfile  = TdsRequestedDataset.getFile(relpath);
-        String realpath = realfile.getAbsolutePath();
+        // For some reason, I cannot get Spring autowiring to work with
+        // MockServlet, so provide alternate.
+        File realfile;
+        if(TESTING) {
+            ServletContext cxt = drq.getContext();
+            realfile = new File(cxt.getRealPath(relpath));
+        } else
+            realfile  = TdsRequestedDataset.getFile(relpath);
+        String realpath = DapUtil.canonicalpath(realfile.getAbsolutePath());
         if(!realfile.exists())
             throw new DapException("Requested file not found " + realpath)
                     .setCode(DapCodes.SC_NOT_FOUND);

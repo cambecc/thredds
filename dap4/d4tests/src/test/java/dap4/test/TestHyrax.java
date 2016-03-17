@@ -158,7 +158,7 @@ public class TestHyrax extends DapTestCommon
     @Before
     public void setup() throws Exception
     {
-        this.testroot = getTestInputFilesDir();
+        this.testroot = getD4TestsRoot();
         this.testroot = DapUtil.absolutize(this.testroot); // handle problem of windows paths
         System.out.println("Using source url " + this.sourceurl);
         defineAllTestcases(this.testroot, this.sourceurl);

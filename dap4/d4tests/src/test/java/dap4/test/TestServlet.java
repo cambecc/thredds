@@ -35,6 +35,7 @@ public class TestServlet extends DapTestCommon
     //////////////////////////////////////////////////
     // Constants
 
+    static protected final String RESOURCEPATH = "/src/resources"; // wrt getTestInputFilesDIr
     static protected final String TESTINPUTDIR = "/testfiles";
     static protected final String BASELINEDIR = "/TestServlet/baseline";
     static protected final String GENERATEDIR = "/TestCDMClient/testinput";
@@ -158,9 +159,9 @@ public class TestServlet extends DapTestCommon
     {
         if(prop_ascii)
             Generator.setASCII(true);
-        ServletTest.setRoots(canonjoin(getTestInputFilesDir(), TESTINPUTDIR),
-                canonjoin(getTestInputFilesDir(), BASELINEDIR),
-                canonjoin(getTestInputFilesDir(), GENERATEDIR));
+        ServletTest.setRoots(canonjoin(getResourceRoot(), TESTINPUTDIR),
+                canonjoin(getResourceRoot(), BASELINEDIR),
+                canonjoin(getResourceRoot(), GENERATEDIR));
         defineAllTestcases();
         chooseTestcases();
     }
@@ -171,8 +172,8 @@ public class TestServlet extends DapTestCommon
     protected void
     chooseTestcases()
     {
-        if(false) {
-            chosentests = locate("test_struct_nested.hdf5");
+        if(true) {
+            chosentests = locate("test_fill.nc");
             prop_visual = true;
         } else {
             for(ServletTest tc : alltestcases) {
@@ -184,21 +185,6 @@ public class TestServlet extends DapTestCommon
     protected void
     defineAllTestcases()
     {
-        this.alltestcases.add(
-                new ServletTest("tst_fills.nc", "dmr,dap", true,  //0
-                        // S4
-                        new Dump.Commands()
-                        {
-                            public void run(Dump printer) throws IOException
-                            {
-                                printer.printvalue('U', 1);
-                                printer.printchecksum();
-                                printer.printvalue('S', 2);
-                                printer.printchecksum();
-                                printer.printvalue('U', 4);
-                                printer.printchecksum();
-                            }
-                        }));
         this.alltestcases.add(
                 new ServletTest("test_fill.nc", "dmr,dap", true,  //0
                         // S4

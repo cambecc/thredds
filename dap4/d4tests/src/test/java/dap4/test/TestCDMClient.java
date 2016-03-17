@@ -150,7 +150,7 @@ public class TestCDMClient extends DapTestCommon
     public void setup() throws Exception
     {
         DapCache.flush();
-        this.testroot = getTestInputFilesDir();
+        this.testroot = getD4TestsRoot();
         this.testroot = DapUtil.absolutize(this.testroot); // handle problem of windows paths
         this.datasetpath = this.testroot + "/" + TESTINPUTDIR;
         findServer(this.datasetpath);

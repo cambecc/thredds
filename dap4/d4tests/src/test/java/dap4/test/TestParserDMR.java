@@ -93,9 +93,9 @@ public class TestParserDMR extends DapTestCommon
 
     protected void defineTestCases()
     {
-        String dirpath1 = getTestInputFilesDir() + "/" + DIR1;
-        String dirpath2 = getTestInputFilesDir() + "/" + DIR2;
-        String dirpath3 = getTestInputFilesDir() + "/" + DIR3;
+        String dirpath1 = getD4TestsRoot() + "/" + DIR1;
+        String dirpath2 = getD4TestsRoot() + "/" + DIR2;
+        String dirpath3 = getD4TestsRoot() + "/" + DIR3;
 
         if (false) {
             alltestcases.add(new TestCase(dirpath1, "test_simple_1", "xml"));
@@ -178,7 +178,7 @@ public class TestParserDMR extends DapTestCommon
         int i, c;
 
         String testinput = testcase.dir + "/" + testcase.name + "." + testcase.ext;
-        String baseline = getTestInputFilesDir() + "/" + BASELINEDIR + "/" + testcase.name + ".dmp";
+        String baseline = getD4TestsRoot() + "/" + BASELINEDIR + "/" + testcase.name + ".dmp";
 
         System.out.println("Testcase: " + testinput); System.out.flush();
 

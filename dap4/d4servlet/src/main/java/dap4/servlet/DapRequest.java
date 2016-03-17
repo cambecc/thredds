@@ -199,6 +199,11 @@ public class DapRequest
     //////////////////////////////////////////////////
     // Accessor(s)
 
+    public ServletContext getContext()
+    {
+        return this.servletcontext;
+    }
+
     public HttpServletRequest getRequest()
     {
         return request;
