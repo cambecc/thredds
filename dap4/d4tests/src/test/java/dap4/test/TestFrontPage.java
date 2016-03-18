@@ -31,14 +31,14 @@ public class TestFrontPage extends DapTestCommon
 
     protected String datasetpath = null;
 
-    protected String testroot = null;
+    protected String resourceroot = null;
 
     //////////////////////////////////////////////////
 
     @Before
     public void setup() throws Exception {
-        this.testroot = getD4TestsRoot();
-        this.datasetpath = this.testroot + "/" + DATADIR;
+        this.resourceroot = getResourceRoot();
+        this.datasetpath = this.resourceroot + "/" + DATADIR;
     }
 
     //////////////////////////////////////////////////
@@ -71,7 +71,7 @@ public class TestFrontPage extends DapTestCommon
             visual("Front Page", html);
 
 	    // Figure out the baseline
-        String baselinepath = this.testroot + "/" + BASELINEDIR + "/" + TESTFILE;
+        String baselinepath = this.resourceroot + "/" + BASELINEDIR + "/" + TESTFILE;
 	
         if(prop_baseline) {
             writefile(baselinepath, html);

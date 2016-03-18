@@ -90,7 +90,7 @@ public class TestConstraints extends DapTestCommon
     List<ClientTest> alltestcases = new ArrayList<ClientTest>();
     List<ClientTest> chosentests = new ArrayList<ClientTest>();
 
-    String testroot = null;
+    String resourceroot = null;
     String datasetpath = null;
 
     String sourceurl = null;
@@ -99,16 +99,16 @@ public class TestConstraints extends DapTestCommon
 
     @Before
     public void setup() throws Exception {
-        this.testroot = getD4TestsRoot();
+        this.resourceroot = getResourceRoot();
         // Check for windows path
-        if(alpha.indexOf(this.testroot.charAt(0)) >= 0 && this.testroot.charAt(1) == ':') {
-        } else if(this.testroot.charAt(0) != '/')
-            this.testroot = "/" + this.testroot;
-        this.datasetpath = this.testroot + "/" + TESTINPUTDIR;
+        if(alpha.indexOf(this.resourceroot.charAt(0)) >= 0 && this.resourceroot.charAt(1) == ':') {
+        } else if(this.resourceroot.charAt(0) != '/')
+            this.resourceroot = "/" + this.resourceroot;
+        this.datasetpath = this.resourceroot + "/" + TESTINPUTDIR;
         findServer(this.datasetpath);
         this.sourceurl = d4tsServer;
         System.out.println("Using source url " + this.sourceurl);
-        defineAllTestcases(this.testroot, this.sourceurl);
+        defineAllTestcases(this.resourceroot, this.sourceurl);
         chooseTestcases();
         if(DMRPARSEDEBUG) Dap4Parser.setGlobalDebugLevel(1);
         if(CEPARSEDEBUG) CEParser.setGlobalDebugLevel(1);

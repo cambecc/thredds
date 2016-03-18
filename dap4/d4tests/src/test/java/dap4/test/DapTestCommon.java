@@ -14,7 +14,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
-import thredds.server.dap4.Dap4Controller;
 import ucar.httpservices.HTTPFactory;
 import ucar.httpservices.HTTPMethod;
 import ucar.httpservices.HTTPUtil;
@@ -22,6 +21,7 @@ import ucar.nc2.dataset.DatasetUrl;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.unidata.test.util.TestDir;
 
+import javax.servlet.ServletException;
 import java.io.*;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -89,15 +89,15 @@ abstract public class DapTestCommon
             this.resp = new MockHttpServletResponse();
             req.setMethod("GET");
             setup();
-            this.controller = new Dap4Controller();
-            controller.init();
         }
 
         protected Mocker
         setController(DapController ct)
+                throws ServletException
         {
             this.controller = ct;
             this.controller.TESTING = true;
+            //this.controller.init();
             return this;
         }
 
@@ -315,7 +315,6 @@ abstract public class DapTestCommon
             prop_diff = false;
         prop_controls = System.getProperty("controls", "");
     }
-
 
     //////////////////////////////////////////////////
     // Overrideable methods

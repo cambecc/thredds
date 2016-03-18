@@ -89,7 +89,7 @@ public class TestNc4Iosp extends DapTestCommon
         if(!HDF5) {
             CDMDSP.loadNc4Iosp();  // Load Nc4Iosp
         }
-        this.root = getD4TestsRoot();
+        this.root = getResourceRoot();
         Nc4IospTest.testinputroot = root;
         File f = new File(root + "/" + BASELINEDIR);
         if(!f.exists()) f.mkdir();

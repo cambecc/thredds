@@ -157,9 +157,9 @@ public class TestD4TS extends DapTestCommon
     {
         if(prop_ascii)
             Generator.setASCII(true);
-        ServletTest.setRoots(canonjoin(getD4TestsRoot(), TESTINPUTDIR),
-                canonjoin(getD4TestsRoot(), BASELINEDIR),
-                canonjoin(getD4TestsRoot(), GENERATEDIR));
+        ServletTest.setRoots(canonjoin(getResourceRoot(), TESTINPUTDIR),
+                canonjoin(getResourceRoot(), BASELINEDIR),
+                canonjoin(getResourceRoot(), GENERATEDIR));
         defineAllTestcases();
         chooseTestcases();
     }
@@ -720,7 +720,7 @@ public class TestD4TS extends DapTestCommon
     //////////////////////////////////////////////////
     // Junit test methods
     @Test
-    public void testServlet()
+    public void testD4TS()
             throws Exception
     {
         DapCache.flush();

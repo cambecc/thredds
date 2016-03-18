@@ -148,7 +148,7 @@ public class TestHyrax extends DapTestCommon
     List<ClientTest> alltestcases = new ArrayList<ClientTest>();
     List<ClientTest> chosentests = new ArrayList<ClientTest>();
 
-    String testroot = null;
+    String resourceroot = null;
     String datasetpath = null;
 
     String sourceurl = null;
@@ -158,10 +158,10 @@ public class TestHyrax extends DapTestCommon
     @Before
     public void setup() throws Exception
     {
-        this.testroot = getD4TestsRoot();
-        this.testroot = DapUtil.absolutize(this.testroot); // handle problem of windows paths
+        this.resourceroot = getResourceRoot();
+        this.resourceroot = DapUtil.absolutize(this.resourceroot); // handle problem of windows paths
         System.out.println("Using source url " + this.sourceurl);
-        defineAllTestcases(this.testroot, this.sourceurl);
+        defineAllTestcases(this.resourceroot, this.sourceurl);
         chooseTestcases();
     }
 

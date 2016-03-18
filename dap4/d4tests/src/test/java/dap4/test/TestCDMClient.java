@@ -139,7 +139,7 @@ public class TestCDMClient extends DapTestCommon
     List<ClientTest> alltestcases = new ArrayList<ClientTest>();
     List<ClientTest> chosentests = new ArrayList<ClientTest>();
 
-    String testroot = null;
+    String resourceroot = null;
     String datasetpath = null;
 
     String sourceurl = null;
@@ -150,13 +150,13 @@ public class TestCDMClient extends DapTestCommon
     public void setup() throws Exception
     {
         DapCache.flush();
-        this.testroot = getD4TestsRoot();
-        this.testroot = DapUtil.absolutize(this.testroot); // handle problem of windows paths
-        this.datasetpath = this.testroot + "/" + TESTINPUTDIR;
+        this.resourceroot = getResourceRoot();
+        this.resourceroot = DapUtil.absolutize(this.resourceroot); // handle problem of windows paths
+        this.datasetpath = this.resourceroot + "/" + TESTINPUTDIR;
         findServer(this.datasetpath);
         this.sourceurl = d4tsServer;
         System.out.println("Using source url " + this.sourceurl);
-        defineAllTestcases(this.testroot, this.sourceurl);
+        defineAllTestcases(this.resourceroot, this.sourceurl);
         chooseTestcases();
     }
 

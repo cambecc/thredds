@@ -97,7 +97,7 @@ public class TestSerial extends DapTestCommon
     protected List<ClientTest> alltestcases = new ArrayList<ClientTest>();
     protected List<ClientTest> chosentests = new ArrayList<ClientTest>();
 
-    protected String testroot = null;
+    protected String resourceroot = null;
     protected String datasetpath = null;
 
     protected String sourceurl = null;
@@ -106,15 +106,15 @@ public class TestSerial extends DapTestCommon
 
     @Before
     public void setup() throws Exception {
-        this.testroot = getD4TestsRoot();
+        this.resourceroot = getResourceRoot();
         // Check for windows path
-        if(!DapUtil.hasDriveLetter(this.testroot))
-            this.testroot = DapUtil.absolutize(this.testroot);
-        this.datasetpath = this.testroot + "/" + BASELINEDIR;
+        if(!DapUtil.hasDriveLetter(this.resourceroot))
+            this.resourceroot = DapUtil.absolutize(this.resourceroot);
+        this.datasetpath = this.resourceroot + "/" + BASELINEDIR;
         findServer(this.datasetpath);
         this.sourceurl = d4tsServer;
         System.out.println("Using source url " + this.sourceurl);
-        defineAllTestcases(this.testroot, this.sourceurl);
+        defineAllTestcases(this.resourceroot, this.sourceurl);
         chooseTestcases();
     }
 
