@@ -185,16 +185,17 @@ abstract public class Dap4Actions extends Dap4EventHandler
     abstract void leavecontainerattribute() throws ParseException;
 
     abstract void value(SaxEvent value) throws ParseException;
+    abstract void value(String value) throws ParseException;
 
     abstract void entererror(XMLAttributeMap attrs) throws ParseException;
 
     abstract void leaveerror() throws ParseException;
 
-    abstract void errormessage(SaxEvent value) throws ParseException;
+    abstract void errormessage(String value) throws ParseException;
 
-    abstract void errorcontext(SaxEvent value) throws ParseException;
+    abstract void errorcontext(String value) throws ParseException;
 
-    abstract void errorotherinfo(SaxEvent value) throws ParseException;
+    abstract void errorotherinfo(String value) throws ParseException;
 
     abstract void otherxml(XMLAttributeMap attrs, DapXML root) throws ParseException;
 
@@ -203,5 +204,7 @@ abstract public class Dap4Actions extends Dap4EventHandler
     abstract DapXML element_or_text(SaxEvent open, XMLAttributeMap xmlattrlist, DapXML.XMLList body, SaxEvent close) throws ParseException;
 
     abstract DapXML xmltext(SaxEvent text) throws ParseException;
+
+    abstract String textstring(String prefix, SaxEvent text) throws ParseException;
 
 }// class Dap4Actions

@@ -9,6 +9,7 @@ import dap4.servlet.Generator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import thredds.server.dap4.Dap4Controller;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -764,8 +765,7 @@ public class TestD4TS extends DapTestCommon
     {
         boolean pass = true;
         // Create request and response objects
-        Mocker mocker = new Mocker("dap4", testcase.makeurl(RequestMode.DMR), this);
-        mocker.setController(new D4TSServlet());
+        Mocker mocker = new Mocker("dap4", testcase.makeurl(RequestMode.DMR), new D4TSServlet(), this);
         // See if the servlet can process this
         try {
             mocker.controller.handleRequest(mocker.req, mocker.resp);

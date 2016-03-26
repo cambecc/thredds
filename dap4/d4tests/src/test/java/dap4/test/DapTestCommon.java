@@ -14,6 +14,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
+import thredds.server.dap4.Dap4Controller;
 import ucar.httpservices.HTTPFactory;
 import ucar.httpservices.HTTPMethod;
 import ucar.httpservices.HTTPUtil;
@@ -59,7 +60,7 @@ abstract public class DapTestCommon
     //////////////////////////////////////////////////
     // Type decls
 
-    static public class Mocker
+    static  class Mocker
     {
         public MockHttpServletRequest req = null;
         public MockHttpServletResponse resp = null;
@@ -73,9 +74,17 @@ abstract public class DapTestCommon
         public Mocker(String servletname, String url, DapTestCommon parent)
                 throws Exception
         {
+            this(servletname,url,new Dap4Controller(),parent);
+        }
+
+        public Mocker(String servletname, String url, DapController controller, DapTestCommon parent)
+                        throws Exception
+                {
             this.parent = parent;
             this.url = url;
             this.servletname = servletname;
+            if(controller != null)
+                setController(controller);
             String testdir = parent.getResourceRoot();
             // There appears to be bug in the spring core.io code
             // such that it assumes absolute paths start with '/'.
@@ -91,14 +100,12 @@ abstract public class DapTestCommon
             setup();
         }
 
-        protected Mocker
+        protected void
         setController(DapController ct)
                 throws ServletException
         {
             this.controller = ct;
             this.controller.TESTING = true;
-            //this.controller.init();
-            return this;
         }
 
         /**
@@ -121,13 +128,13 @@ abstract public class DapTestCommon
             // Divide into contextpath + servletpath
             String[] pieces = path.split("[/]");
             int i;
-            for(i=0;i<pieces.length;i++) {
+            for(i = 0; i < pieces.length; i++) {
                 if(pieces[i].equals(this.servletname)) break;
             }
             if(i == pieces.length)
-                throw new IllegalArgumentException("Bad mock uri path: "+path);
-            String cp = "/" + DapUtil.join(pieces,"/",0,i);
-            String sp = "/" + DapUtil.join(pieces,"/",i,pieces.length);
+                throw new IllegalArgumentException("Bad mock uri path: " + path);
+            String cp = "/" + DapUtil.join(pieces, "/", 0, i);
+            String sp = "/" + DapUtil.join(pieces, "/", i, pieces.length);
             this.req.setContextPath(cp);
             this.req.setServletPath(sp);
         }
@@ -135,6 +142,8 @@ abstract public class DapTestCommon
         public byte[] execute()
                 throws Exception
         {
+            if(this.controller == null)
+                throw new DapException("Mocker: no controller");
             this.controller.handleRequest(this.req, this.resp);
             return this.resp.getContentAsByteArray();
         }
@@ -321,7 +330,7 @@ abstract public class DapTestCommon
 
     protected String getD4TestsRoot()
     {
-         return this.dap4testroot;
+        return this.dap4testroot;
     }
 
     protected String getResourceRoot()
@@ -444,8 +453,7 @@ abstract public class DapTestCommon
             throws IOException
     {
         StringBuilder buf = new StringBuilder();
-        File xx = new File(filename);
-        if(!xx.canRead()) {
+        if(!new File(filename).canRead()) {
             int x = 0;
         }
         FileReader file = new FileReader(filename);

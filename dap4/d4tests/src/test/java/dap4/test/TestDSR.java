@@ -4,6 +4,7 @@ package dap4.test;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import thredds.server.dap4.Dap4Controller;
 
 /**
  * TestFrontPage verifies the front page

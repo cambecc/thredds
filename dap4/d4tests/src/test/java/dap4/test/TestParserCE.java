@@ -7,10 +7,12 @@ package dap4.test;
 
 import dap4.ce.CEConstraint;
 import dap4.ce.CECompiler;
-import dap4.ce.parser.CEParser;
+import dap4.ce.parser.CEParserImpl;
 import dap4.core.dmr.DapDataset;
 import dap4.core.dmr.DefaultFactory;
+import dap4.core.dmr.parser.DOM4Parser;
 import dap4.core.dmr.parser.Dap4Parser;
+import dap4.core.dmr.parser.Dap4ParserImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +29,8 @@ public class TestParserCE extends DapTestCommon
     static final boolean DMRPARSEDEBUG = false;
     static final boolean CEPARSEDEBUG = false;
     static final String TESTCASEDIR = "src/test/data/resources/TestParsers"; // relative to dap4 root
+
+    static final boolean USEDOM = false;
 
     //////////////////////////////////////////////////
     // Type decls
@@ -157,12 +161,16 @@ public class TestParserCE extends DapTestCommon
 
         // Create the DMR tree
         System.out.println("Parsing DMR");
-        Dap4Parser pushparser = new Dap4Parser(new DefaultFactory());
+        Dap4Parser parser;
+        if(USEDOM)
+            parser = new DOM4Parser(new DefaultFactory());
+        else
+        parser = new Dap4ParserImpl(new DefaultFactory());
         if(DMRPARSEDEBUG)
-            pushparser.setDebugLevel(1);
-        boolean parseok = pushparser.parse(testset.dmr);
+            parser.setDebugLevel(1);
+        boolean parseok = parser.parse(testset.dmr);
         if(parseok)
-            dmr = pushparser.getDMR();
+            dmr = parser.getDMR();
         if(dmr == null)
             parseok = false;
         if(!parseok)
@@ -175,9 +183,9 @@ public class TestParserCE extends DapTestCommon
         CEConstraint ceroot = null;
         System.out.println("constraint: " + testset.constraint);
         System.out.flush();
-        CEParser ceparser = null;
+        CEParserImpl ceparser = null;
         try {
-            ceparser = new CEParser(dmr);
+            ceparser = new CEParserImpl(dmr);
             if(CEPARSEDEBUG)
                 ceparser.setDebugLevel(1);
             parseok = ceparser.parse(testset.constraint);

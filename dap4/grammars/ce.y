@@ -11,7 +11,7 @@ Comment out in case we are using an older version of bison
 */
 %define abstract
 %define package {dap4.ce.parser}
-%define parser_class_name {CEParserBody}
+%define parser_class_name {CEBisonParser}
 %define throws {ParseException}
 %define lex_throws {ParseException}
 

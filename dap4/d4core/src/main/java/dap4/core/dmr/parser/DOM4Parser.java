@@ -27,7 +27,7 @@ import java.util.*;
  * Implement the Dap4 Parser Using a DOM Parser
  */
 
-public class DOM4Parser
+public class DOM4Parser implements Dap4Parser
 {
 
     //////////////////////////////////////////////////

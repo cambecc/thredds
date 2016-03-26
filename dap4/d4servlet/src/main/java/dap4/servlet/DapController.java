@@ -8,7 +8,7 @@ package dap4.servlet;
 import dap4.ce.CEAST;
 import dap4.ce.CECompiler;
 import dap4.ce.CEConstraint;
-import dap4.ce.parser.CEParser;
+import dap4.ce.parser.CEParserImpl;
 import dap4.core.dmr.DapDataset;
 import dap4.core.dmr.ErrorResponse;
 import dap4.core.util.DapException;
@@ -18,7 +18,6 @@ import dap4.dap4shared.DSP;
 import dap4.dap4shared.DapLog;
 import dap4.dap4shared.DapProtocol;
 import dap4.dap4shared.RequestMode;
-import dap4.servlet.DapRequest;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -471,7 +470,7 @@ abstract public class DapController extends HttpServlet
         // Process any constraint
         if(sce == null || sce.length() == 0)
             return CEConstraint.getUniversal(dmr);
-        CEParser ceparser = new CEParser(dmr);
+        CEParserImpl ceparser = new CEParserImpl(dmr);
         if(PARSEDEBUG)
             ceparser.setDebugLevel(1);
         if(DEBUG) {

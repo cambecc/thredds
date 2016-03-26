@@ -5,16 +5,17 @@
 package dap4.dap4shared;
 
 import dap4.core.data.DataDataset;
-import dap4.core.data.DataException;
 import dap4.core.dmr.DapAttribute;
 import dap4.core.dmr.DapDataset;
 import dap4.core.dmr.DapNode;
 import dap4.core.dmr.DefaultFactory;
+import dap4.core.dmr.parser.DOM4Parser;
+import dap4.core.dmr.parser.Dap4ParserImpl;
 import dap4.core.dmr.parser.Dap4Parser;
-import dap4.core.util.*;
+import dap4.core.util.DapContext;
+import dap4.core.util.DapException;
 import org.xml.sax.SAXException;
 
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,8 @@ abstract public class AbstractDSP implements DSP
     // constants
 
     static protected final boolean PARSEDEBUG = false;
+
+    static public final boolean USEDOM = false;
 
     //////////////////////////////////////////////////
     // Instance variables
@@ -123,18 +126,22 @@ abstract public class AbstractDSP implements DSP
             throws DapException
     {
         // Parse the dmr
-        Dap4Parser pushparser = new Dap4Parser(new DefaultFactory());
+        Dap4Parser parser;
+        if(USEDOM)
+            parser = new Dap4ParserImpl(new DefaultFactory());
+        else
+            parser = new DOM4Parser(new DefaultFactory());
         if(PARSEDEBUG)
-            pushparser.setDebugLevel(1);
+            parser.setDebugLevel(1);
         try {
-            if(!pushparser.parse(document))
+            if(!parser.parse(document))
                 throw new DapException("DMR Parse failed");
         } catch (SAXException se) {
             throw new DapException(se);
         }
-        if(pushparser.getErrorResponse() != null)
+        if(parser.getErrorResponse() != null)
             throw new DapException("Error Response Document not supported");
-        DapDataset result = pushparser.getDMR();
+        DapDataset result = parser.getDMR();
         processAttributes(result);
         return result;
     }

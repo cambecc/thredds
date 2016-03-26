@@ -7,7 +7,7 @@ package dap4.ce.parser;
 
 import dap4.core.dmr.parser.ParseException;
 
-class CELexer implements CEParser.Lexer
+class CELexer implements CEParserImpl.Lexer
 {
 
     //////////////////////////////////////////////////
@@ -130,7 +130,7 @@ class CELexer implements CEParser.Lexer
      * Per-lexer state
      */
 
-    CEParser parsestate = null; // our parent parser
+    CEParserImpl parsestate = null; // our parent parser
 
     Object lval = null;
 
@@ -142,7 +142,7 @@ class CELexer implements CEParser.Lexer
     //////////////////////////////////////////////////
     // Constructor(s)
 
-    public CELexer(CEParser state)
+    public CELexer(CEParserImpl state)
     {
         this();
         setParser(state);
@@ -157,7 +157,7 @@ class CELexer implements CEParser.Lexer
 
     /* Get/Set */
 
-    void setParser(CEParser state)
+    void setParser(CEParserImpl state)
     {
         this.parsestate = state;
     }
@@ -249,7 +249,7 @@ class CELexer implements CEParser.Lexer
                     }
                     if(more) yytext.append((char) c);
                 }
-                token = CEParser.Lexer.STRING;
+                token = CEParserImpl.Lexer.STRING;
             } else if(DELIMS.indexOf(c) >= 0) {
                 // Single char delimiter
                 yytext.append((char) c);
@@ -270,9 +270,9 @@ class CELexer implements CEParser.Lexer
                 if(c != EOS) text.backup();
                 try {// See if this looks like an integer
                     long num = Long.parseLong(yytext.toString());
-                    token = CEParser.Lexer.LONG;
+                    token = CEParserImpl.Lexer.LONG;
                 } catch (NumberFormatException nfe) {
-                    token = CEParser.Lexer.NAME;
+                    token = CEParserImpl.Lexer.NAME;
                 }
             }
         }
@@ -296,19 +296,19 @@ class CELexer implements CEParser.Lexer
             stoken = Character.toString((char) token);
         else
             switch (token) {
-            case CEParser.Lexer.STRING:
+            case CEParserImpl.Lexer.STRING:
                 stoken = '"' + lval + '"';
                 break;
-            case CEParser.Lexer.LONG:
+            case CEParserImpl.Lexer.LONG:
                 stoken = lval;
                 break;
-            case CEParser.Lexer.DOUBLE:
+            case CEParserImpl.Lexer.DOUBLE:
                 stoken = lval;
                 break;
-            case CEParser.Lexer.BOOLEAN:
+            case CEParserImpl.Lexer.BOOLEAN:
                 stoken = lval;
                 break;
-            case CEParser.Lexer.NAME:
+            case CEParserImpl.Lexer.NAME:
                 stoken = lval;
                 break;
             default:
@@ -348,7 +348,7 @@ class CELexer implements CEParser.Lexer
      */
     public void yyerror(String s)
     {
-        System.err.println("CEParser.yyerror: " + s + "; parse failed at char: " + charno + "; near: ");
+        System.err.println("CEParserImpl.yyerror: " + s + "; parse failed at char: " + charno + "; near: ");
         String context = getInput();
         int show = (context.length() < CONTEXTLEN ? context.length() : CONTEXTLEN);
         System.err.println(context.substring(context.length() - show) + "^");

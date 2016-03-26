@@ -752,7 +752,6 @@ public class TestServlet extends DapTestCommon
         boolean pass = true;
         // Create request and response objects
         Mocker mocker = new Mocker("dap4", testcase.makeurl(RequestMode.DMR), this);
-        mocker.setController(new Dap4Controller());
         // See if the servlet can process this
         try {
             mocker.controller.handleRequest(mocker.req, mocker.resp);

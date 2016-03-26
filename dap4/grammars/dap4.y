@@ -9,7 +9,7 @@
 %define api.push-pull push
 %define abstract
 %define package {dap4.core.dmr.parser}
-%define parser_class_name {Dap4ParserBody}
+%define parser_class_name {Dap4BisonParser}
 %define extends {Dap4Actions}
 %define throws {DapException}
 %define lex_throws {DapException}
@@ -88,6 +88,7 @@ System.err.printf("near %s%n",getLocator());
 %type <SaxEvent> xml_open xml_close xml_attribute
 %type <DapXML.XMLList> xml_body
 %type <DapXML> element_or_text
+%type <String> textstring
 
 %start response
 
@@ -396,7 +397,7 @@ valuelist:
 	;
 
 value:
-	  VALUE_ TEXT _VALUE /* text can contain multiple values */
+	  VALUE_ textstring _VALUE /* text can contain multiple values */
 		{value($2);}
 	| VALUE_ ATTR_VALUE _VALUE /* Single Value */
 		{value($2);}
@@ -541,11 +542,17 @@ error_body:
 	;
 
 error_element:
-	  MESSAGE_ TEXT _MESSAGE
+	  MESSAGE_ textstring _MESSAGE
 		{errormessage($2);}
-	| CONTEXT_ TEXT _CONTEXT
+	| CONTEXT_ textstring _CONTEXT
 		{errorcontext($2);}
-	| OTHERINFO_ TEXT _OTHERINFO
+	| OTHERINFO_ textstring _OTHERINFO
 		{errorotherinfo($2);}
-	
+	;
+
+textstring:
+	  TEXT
+		{$$=textstring(null,$1);}
+	| textstring TEXT
+		{$$=textstring($1,$2);}
 	;

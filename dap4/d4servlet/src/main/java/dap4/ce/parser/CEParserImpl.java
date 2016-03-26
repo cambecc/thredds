@@ -11,7 +11,7 @@ import dap4.core.util.*;
 import java.util.*;
 
 
-public class CEParser extends CEParserBody
+public class CEParserImpl extends CEBisonParser
 {
 
     //////////////////////////////////////////////////
@@ -40,7 +40,7 @@ public class CEParser extends CEParserBody
     //////////////////////////////////////////////////
     // Constructors
 
-    public CEParser(DapDataset template)
+    public CEParserImpl(DapDataset template)
             throws ParseException
     {
         super(null);
