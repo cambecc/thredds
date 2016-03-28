@@ -18,9 +18,7 @@ public class TestDSR extends DapTestCommon
     //////////////////////////////////////////////////
     // Constants
 
-    static protected String DATADIR = "src/test/data"; // relative to d4tests root
-    static protected String TESTDATADIR = DATADIR + "/resources/";
-    static protected String BASELINEDIR = DATADIR + "/resources/TestDSR/baseline";
+    static protected String BASELINEDIR = "/TestDSR/baseline";
 
     // constants for Fake Request
     static protected final String FAKEDATASET = "test1";
@@ -31,21 +29,12 @@ public class TestDSR extends DapTestCommon
 
     protected String datasetpath = null;
 
-    protected String testroot = null;
-
     //////////////////////////////////////////////////
 
     @Before
     public void setup() throws Exception {
-        this.testroot = getTestFilesDir();
-        this.datasetpath = this.testroot + "/" + DATADIR;
+        this.datasetpath = getResourceRoot();
     }
-
-    protected String
-       getTestFilesDir()
-       {
-           return DATADIR;
-       }
 
     //////////////////////////////////////////////////
     // Junit test methods
@@ -75,7 +64,7 @@ public class TestDSR extends DapTestCommon
             visual("TestDSR", dsr);
 
         // Figure out the baseline
-        String baselinepath = this.testroot + "/" + BASELINEDIR + "/" + FAKEDATASET + ".dsr";
+        String baselinepath = getResourceRoot() + BASELINEDIR + "/" + FAKEDATASET + ".dsr";
 
         if(prop_baseline) {
             writefile(baselinepath, dsr);
