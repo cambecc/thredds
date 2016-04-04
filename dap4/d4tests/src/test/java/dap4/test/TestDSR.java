@@ -72,7 +72,7 @@ public class TestDSR extends DapTestCommon
             // Read the baseline file
             String baselinecontent = readfile(baselinepath);
             System.out.println("DSR Comparison:");
-            pass = compare(baselinecontent, dsr);
+            pass = same(getTitle(),baselinecontent, dsr);
             System.out.println(pass ? "Pass" : "Fail");
         }
         Assert.assertTrue(pass);

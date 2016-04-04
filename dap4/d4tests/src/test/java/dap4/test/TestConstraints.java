@@ -65,7 +65,7 @@ public class TestConstraints extends DapTestCommon
         String makeurl()
         {
             String url = url = server + "/" + dataset;
-            if(constraint != null) url += "?" + DapTestCommon.CONSTRAINTTAG + "=" + constraint;
+            if(constraint != null) url += "?" + CONSTRAINTTAG + "=" + constraint;
             return url;
         }
 
@@ -75,7 +75,7 @@ public class TestConstraints extends DapTestCommon
             buf.append(dataset);
             buf.append("{");
             if(constraint != null)
-                buf.append("?" + DapTestCommon.CONSTRAINTTAG + "=" + constraint);
+                buf.append("?" + CONSTRAINTTAG + "=" + constraint);
             return buf.toString();
         }
     }
@@ -193,7 +193,7 @@ public class TestConstraints extends DapTestCommon
             // Read the baseline file(s)
             String baselinecontent = readfile(testcase.baselinepath);
             System.out.println("Comparison:");
-            pass = pass && compare(baselinecontent, testoutput);
+            pass = pass && same(getTitle(),baselinecontent, testoutput);
             System.out.println(pass ? "Pass" : "Fail");
         }
         return pass;

@@ -14,6 +14,7 @@ import dap4.servlet.DMRPrint;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import ucar.nc2.util.CommonTestUtils;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -74,9 +75,9 @@ public class TestParserDMR extends DapTestCommon
 
     //////////////////////////////////////////////////
 
-    @Before
-    public void setup()
+    public TestParserDMR()
     {
+        super();
         setControls();
         defineTestCases();
         chooseTestcases();
@@ -197,13 +198,13 @@ public class TestParserDMR extends DapTestCommon
             throws Exception
     {
         int failcount = 0;
-        int totalcount = 0;
-        for(TestCase testcase : chosentests) {
+        int ntests = 0;
+        for (TestCase testcase : chosentests) {
+            ntests++;
             if(!doOneTest(testcase))
                 failcount++;
-            totalcount++;
         }
-        Assert.assertTrue(String.format("Tests failed: %d/%d",failcount,totalcount),failcount == 0);
+        Assert.assertTrue("***Fail: "+failcount,failcount==0);
     }
 
     boolean
@@ -258,7 +259,7 @@ public class TestParserDMR extends DapTestCommon
                 baselinecontent = document;
             else
                 baselinecontent = readfile(baseline);
-            pass = compare(baselinecontent, testresult);
+            pass = pass && same(getTitle(),baselinecontent, testresult);
         }
 
         return pass;

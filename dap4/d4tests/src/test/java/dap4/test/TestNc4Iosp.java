@@ -192,7 +192,7 @@ public class TestNc4Iosp extends DapTestCommon
                 System.out.println("DMR Comparison:");
                 try {
                     baselinecontent = readfile(baselinefile + ".dmr");
-                    pass = pass && compare(baselinecontent, metadata);
+                    pass = pass && same(getTitle(),baselinecontent, metadata);
                 } catch (IOException ioe) {
                     System.err.println("baselinefile" + ".dmr: " + ioe.getMessage());
                     pass = false;
@@ -203,7 +203,7 @@ public class TestNc4Iosp extends DapTestCommon
                 System.out.println("DATA Comparison:");
                 try {
                     baselinecontent = readfile(baselinefile + ".dap");
-                    pass = pass && compare(baselinecontent, data);
+                    pass = pass && same(getTitle(),baselinecontent, data);
                 } catch (IOException ioe) {
                     System.err.println("baselinefile" + ".dap: " + ioe.getMessage());
                     pass = false;

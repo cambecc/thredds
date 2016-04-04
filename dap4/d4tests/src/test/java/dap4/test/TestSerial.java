@@ -151,7 +151,6 @@ public class TestSerial extends DapTestCommon
     public void testSerial()
         throws Exception
     {
-	org.junit.Assume.assumeTrue(usingIntellij);
         for(ClientTest testcase : chosentests) {
             if(!doOneTest(testcase)) {
                 Assert.assertTrue(false);
@@ -200,7 +199,7 @@ public class TestSerial extends DapTestCommon
                 // Read the baseline file(s)
                 String baselinecontent = readfile(baselinefile);
                 System.out.println("Comparison:");
-                pass = pass && compare(baselinecontent, testoutput);
+                pass = pass && same(getTitle(),baselinecontent, testoutput);
                 System.out.println(pass ? "Pass" : "Fail");
             }
         }

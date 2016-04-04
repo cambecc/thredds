@@ -208,7 +208,7 @@ public class TestParserCE extends DapTestCommon
         if(prop_diff) { //compare with baseline
             // Read the baseline file
             String baselinecontent = testset.expected;
-            pass = compare(baselinecontent, results);
+            pass = same(getTitle(),baselinecontent, results);
         }
         return pass;
     }

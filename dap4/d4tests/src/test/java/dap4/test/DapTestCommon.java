@@ -15,11 +15,8 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import thredds.server.dap4.Dap4Controller;
-import ucar.httpservices.HTTPFactory;
-import ucar.httpservices.HTTPMethod;
 import ucar.httpservices.HTTPUtil;
-import ucar.nc2.dataset.DatasetUrl;
-import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.util.CommonTestUtils;
 import ucar.unidata.test.util.TestDir;
 
 import javax.servlet.ServletException;
@@ -33,23 +30,12 @@ import java.util.Set;
 @WebAppConfiguration("file:src/test/data")
 abstract public class DapTestCommon
 {
-    private final static Logger logger = LoggerFactory.getLogger(DapTestCommon.class);
-
     //////////////////////////////////////////////////
     // Constants
 
-    static final boolean DEBUG = false;
-
-    static protected final Charset UTF8 = Charset.forName("UTF-8");
-
     static final String DEFAULTTREEROOT = "dap4";
-    // Look for these to verify we have found the thredds root
-    static final String[] DEFAULTSUBDIRS = new String[]{"httpservices", "cdm", "tds", "opendap", "dap4"};
 
     static public final String FILESERVER = "file://localhost:8080";
-
-    // NetcdfDataset enhancement to use: need only coord systems
-    static Set<NetcdfDataset.Enhance> ENHANCEMENT = EnumSet.of(NetcdfDataset.Enhance.CoordSystems);
 
     static public final String CONSTRAINTTAG = "dap4.ce";
 
@@ -65,6 +51,7 @@ abstract public class DapTestCommon
         public MockHttpServletRequest req = null;
         public MockHttpServletResponse resp = null;
         public MockServletContext context = null;
+        public DapController controller = null;
         public String url = null;
         public String servletname = null;
         public DapTestCommon parent = null;
@@ -118,18 +105,41 @@ abstract public class DapTestCommon
                 throws Exception
         {
             this.req.setCharacterEncoding("UTF-8");
-            URI u = HTTPUtil.parseToURI(this.url);
-            this.req.setProtocol(u.getScheme());
-            this.req.setQueryString(u.getQuery());
-            this.req.setServerName(u.getHost());
-            this.req.setServerPort(u.getPort());
-            String path = u.getPath();
-            if(path == null) path = "/";
-            // Divide into contextpath + servletpath
-            String[] pieces = path.split("[/]");
-            int i;
-            for(i = 0; i < pieces.length; i++) {
-                if(pieces[i].equals(this.servletname)) break;
+            this.req.setServletPath("/" + this.servletname);
+            URI url = HTTPUtil.parseToURI(this.url);
+            this.req.setProtocol(url.getScheme());
+            this.req.setQueryString(url.getQuery());
+            this.req.setServerName(url.getHost());
+            this.req.setServerPort(url.getPort());
+            String path = url.getPath();
+            if(path != null) {// probably more complex than it needs to be
+                String prefix = null;
+                String suffix = null;
+                String spiece = "/" + servletname;
+                if(path.equals(spiece) || path.equals(spiece + "/")) {
+                    // path is just spiece
+                    prefix = spiece;
+                    suffix = "/";
+                } else {
+
+                    String[] pieces = path.split(spiece + "/"); // try this first
+                    if(pieces.length == 1 && path.endsWith(spiece))
+                        pieces = path.split(spiece);  // try this
+                    switch (pieces.length) {
+                    case 0:
+                        throw new IllegalArgumentException("CommonTestUtils");
+                    case 1:
+                        prefix = pieces[0] + spiece;
+                        suffix = "";
+                        break;
+                    default: // > 1
+                        prefix = pieces[0] + spiece;
+                        suffix = path.substring(prefix.length());
+                        break;
+                    }
+                }
+                this.req.setContextPath(prefix);
+                this.req.setPathInfo(suffix);
             }
             if(i == pieces.length)
                 throw new IllegalArgumentException("Bad mock uri path: " + path);
@@ -140,7 +150,7 @@ abstract public class DapTestCommon
         }
 
         public byte[] execute()
-                throws Exception
+                throws IOException
         {
             if(this.controller == null)
                 throw new DapException("Mocker: no controller");
@@ -150,58 +160,7 @@ abstract public class DapTestCommon
     }
 
     //////////////////////////////////////////////////
-    // Static Variables
-
-    static public org.slf4j.Logger log;
-
-    static public boolean usingJenkins = (System.getenv("JENKINS_URL") != null);
-    static public boolean usingTravis = (System.getenv("TRAVIS") != null);
-    static public boolean usingIntellij = !(usingJenkins | usingTravis);
-
-    //////////////////////////////////////////////////
     // Static methods
-
-    // Walk around the directory structure to locate
-    // the path to the thredds root (which may not
-    // be names "thredds").
-    // Same as code in UnitTestCommon, but for
-    // some reason, Intellij will not let me import it.
-
-    static String
-    locateThreddsRoot()
-    {
-        // Walk up the user.dir path looking for a node that has
-        // all the directories in SUBROOTS.
-
-        String path = System.getProperty("user.dir");
-
-        // clean up the path
-        path = path.replace('\\', '/'); // only use forward slash
-        assert (path != null);
-        if(path.endsWith("/")) path = path.substring(0, path.length() - 1);
-
-        File prefix = new File(path);
-        for(; prefix != null; prefix = prefix.getParentFile()) {//walk up the tree
-            int found = 0;
-            String[] subdirs = prefix.list();
-            for(String dirname : subdirs) {
-                for(String want : DEFAULTSUBDIRS) {
-                    if(dirname.equals(want)) {
-                        found++;
-                        break;
-                    }
-                }
-            }
-            if(found == DEFAULTSUBDIRS.length) try {// Assume this is it
-                String root = prefix.getCanonicalPath();
-                // clean up the root path
-                root = root.replace('\\', '/'); // only use forward slash
-                return root;
-            } catch (IOException ioe) {
-            }
-        }
-        return null;
-    }
 
     static String
     locateDAP4Root(String threddsroot)
@@ -214,33 +173,6 @@ abstract public class DapTestCommon
         if(!f.exists() || !f.isDirectory())
             root = null;
         return root;
-    }
-
-    static protected String
-    rebuildpath(String[] pieces, int last)
-    {
-        StringBuilder buf = new StringBuilder();
-        for(int i = 0; i <= last; i++) {
-            buf.append("/");
-            buf.append(pieces[i]);
-        }
-        return buf.toString();
-    }
-
-    static public void
-    clearDir(File dir, boolean clearsubdirs)
-    {
-        // wipe out the dir contents
-        if(!dir.exists()) return;
-        for(File f : dir.listFiles()) {
-            if(f.isDirectory()) {
-                if(clearsubdirs) {
-                    clearDir(f, true); // clear subdirs
-                    f.delete();
-                }
-            } else
-                f.delete();
-        }
     }
 
     //////////////////////////////////////////////////
@@ -257,8 +189,7 @@ abstract public class DapTestCommon
 
     // Define a tree pattern to recognize the root.
     protected String threddsroot = null;
-    protected String dap4testroot = null;
-    protected String d4tsServer = null;
+    protected String dap4root = null;
 
     protected String title = "Testing";
 
@@ -269,20 +200,9 @@ abstract public class DapTestCommon
 
     public DapTestCommon(String name)
     {
-        this.title = name;
-        setSystemProperties();
-        initPaths();
-    }
-
-    protected void
-    initPaths()
-    {
-        // Compute the root path
-        this.threddsroot = locateThreddsRoot();
-        if(this.threddsroot == null)
-            System.err.println("Cannot locate /thredds parent dir");
-        String dap4root = locateDAP4Root(this.threddsroot);
-        if(dap4root == null)
+        super(name);
+        this.dap4root = locateDAP4Root(this.threddsroot);
+        if(this.dap4root == null)
             System.err.println("Cannot locate /dap4 parent dir");
         this.dap4testroot = dap4root + "/" + D4TESTDIRNAME;
         // Compute the set of SOURCES
@@ -379,6 +299,9 @@ abstract public class DapTestCommon
         baserdr.close();
         resultrdr.close();
         return pass;
+=======
+            System.err.println("CommonTestUtils: d4tsServer=" + d4tsServer);
+>>>>>>> 5.0.0
     }
 
     protected void
@@ -390,129 +313,23 @@ abstract public class DapTestCommon
         } else {
             String svc = "http://" + d4tsServer + "/d4ts";
             if(!checkServer(svc))
-                logger.warn("D4TS Server not reachable: " + svc);
+                log.warn("D4TS Server not reachable: " + svc);
             // Since we will be accessing it thru NetcdfDataset, we need to change the schema.
             d4tsServer = "dap4://" + d4tsServer + "/d4ts";
         }
     }
 
-    protected boolean
-    checkServer(String candidate)
-    {
-        if(candidate == null) return false;
-/* requires httpclient4
-        int savecount = HTTPSession.getRetryCount();
-        HTTPSession.setRetryCount(1);
-*/
-        // See if the sourceurl is available by trying to get the DSR
-        System.err.print("Checking for sourceurl: " + candidate);
-        try {
-            try (HTTPMethod method = HTTPFactory.Get(candidate)) {
-                method.execute();
-                String s = method.getResponseAsString();
-                System.err.println(" ; found");
-                return true;
-            }
-        } catch (IOException ie) {
-            System.err.println(" ; fail");
-            return false;
-        } finally {
-// requires httpclient4            HTTPSession.setRetryCount(savecount);
-        }
-    }
-
     //////////////////////////////////////////////////
-    // Static utilities
 
-    // Copy result into the a specified dir
-    static public void
-    writefile(String path, String content)
-            throws IOException
+    public String getDAP4Root()
     {
-        File f = new File(path);
-        if(f.exists()) f.delete();
-        FileWriter out = new FileWriter(f);
-        out.write(content);
-        out.close();
+        return this.dap4root;
     }
 
-    // Copy result into the a specified dir
-    static public void
-    writefile(String path, byte[] content)
-            throws IOException
+    @Override
+    public String getResourceDir()
     {
-        File f = new File(path);
-        if(f.exists()) f.delete();
-        FileOutputStream out = new FileOutputStream(f);
-        out.write(content);
-        out.close();
-    }
-
-    static public String
-    readfile(String filename)
-            throws IOException
-    {
-        StringBuilder buf = new StringBuilder();
-        if(!new File(filename).canRead()) {
-            int x = 0;
-        }
-        FileReader file = new FileReader(filename);
-        BufferedReader rdr = new BufferedReader(file);
-        String line;
-        while((line = rdr.readLine()) != null) {
-            if(line.startsWith("#")) continue;
-            buf.append(line + "\n");
-        }
-        return buf.toString();
-    }
-
-    static public byte[]
-    readbinaryfile(String filename)
-            throws IOException
-    {
-        FileInputStream file = new FileInputStream(filename);
-        return DapUtil.readbinaryfile(file);
-    }
-
-    // Properly access a dataset
-    static public NetcdfDataset openDataset(String url)
-            throws IOException
-    {
-        DatasetUrl durl = DatasetUrl.findDatasetUrl(url);
-
-        return NetcdfDataset.acquireDataset(null, durl, ENHANCEMENT, -1, null, null);
-    }
-
-    // Fix up a filename reference in a string
-    static public String shortenFileName(String text, String filename)
-    {
-        // In order to achieve diff consistentcy, we need to
-        // modify the output to change "netcdf .../file.nc {...}"
-        // to "netcdf file.nc {...}"
-        String fixed = filename.replace('\\', '/');
-        String shortname = filename;
-        if(fixed.lastIndexOf('/') >= 0)
-            shortname = filename.substring(fixed.lastIndexOf('/') + 1, filename.length());
-        text = text.replaceAll(filename, shortname);
-        return text;
-    }
-
-    static public void
-    tag(String t)
-    {
-        System.err.println(t);
-        System.err.flush();
-    }
-
-    static public String canonjoin(String prefix, String suffix)
-    {
-        if(prefix == null) prefix = "";
-        if(suffix == null) suffix = "";
-        StringBuilder result = new StringBuilder(prefix);
-        if(!prefix.endsWith("/"))
-            result.append("/");
-        result.append(suffix.startsWith("/") ? suffix.substring(1) : suffix);
-        return result.toString();
+        return this.resourcedir;
     }
 
 }
