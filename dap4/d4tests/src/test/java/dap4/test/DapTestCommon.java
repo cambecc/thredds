@@ -299,9 +299,6 @@ abstract public class DapTestCommon
         baserdr.close();
         resultrdr.close();
         return pass;
-=======
-            System.err.println("CommonTestUtils: d4tsServer=" + d4tsServer);
->>>>>>> 5.0.0
     }
 
     protected void
