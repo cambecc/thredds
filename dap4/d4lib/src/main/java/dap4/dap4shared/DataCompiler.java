@@ -7,7 +7,9 @@ package dap4.dap4shared;
 
 import dap4.core.data.*;
 import dap4.core.dmr.*;
-import dap4.core.util.*;
+import dap4.core.util.DapDump;
+import dap4.core.util.DapException;
+import dap4.core.util.DapSort;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -31,7 +33,7 @@ public class DataCompiler
     //////////////////////////////////////////////////
     // Instance variables
 
-    protected D4DataDataset d4dataset = null;
+    protected DataDataset datadataset = null;
 
     protected DapDataset dataset = null;
 
@@ -40,7 +42,9 @@ public class DataCompiler
 
     protected ChecksumMode checksummode = null;
 
-    protected D4DSP dsp;
+    protected DSP dsp;
+
+    protected DapDataFactory factory = null;
 
     //////////////////////////////////////////////////
     //Constructor(s)
@@ -51,10 +55,12 @@ public class DataCompiler
      * @param dsp          the D4DSP
      * @param checksummode
      * @param databuffer   the source of serialized databuffer
+     * @param factory      for producing data nodes
      */
 
-    public DataCompiler(D4DSP dsp, ChecksumMode checksummode, ByteBuffer databuffer)
-        throws DapException
+    public DataCompiler(DSP dsp, ChecksumMode checksummode,
+                        ByteBuffer databuffer, DapDataFactory factory)
+            throws DapException
     {
         this.dsp = dsp;
         this.dataset = this.dsp.getDMR();
@@ -73,38 +79,38 @@ public class DataCompiler
      */
     public void
     compile()
-        throws DapException
+            throws DapException
     {
         assert (this.dataset != null && this.databuffer != null);
         if(DEBUG) {
             DapDump.dumpbytes(this.databuffer, false);
         }
-        this.d4dataset = new D4DataDataset(this.dsp, this.dataset);
-        this.dsp.setDataDataset(this.d4dataset);
+        this.datadataset = factory.newDataset(this.dsp, this.dataset);
+        this.dsp.setDataDataset(this.datadataset);
 
         // iterate over the variables represented in the databuffer
         for(DapVariable vv : this.dataset.getTopVariables()) {
-            D4DataVariable array = compileVar(vv);
-            this.d4dataset.addVariable(array);
+            DataVariable array = compileVar(vv);
+            this.datadataset.addVariable(array);
         }
     }
 
-    protected D4DataVariable
+    protected DataVariable
     compileVar(DapVariable dapvar)
-        throws DapException
+            throws DapException
     {
-        D4DataVariable array = null;
+        DataVariable array = null;
         boolean isscalar = dapvar.getRank() == 0;
         if(dapvar.getSort() == DapSort.ATOMICVARIABLE) {
             array = compileAtomicVar(dapvar);
         } else if(dapvar.getSort() == DapSort.STRUCTURE) {
             if(isscalar)
-                array = compileStructure((DapStructure)dapvar,null,0);
+                array = compileStructure((DapStructure) dapvar, null, 0);
             else
                 array = compileStructureArray(dapvar);
         } else if(dapvar.getSort() == DapSort.SEQUENCE) {
             if(isscalar)
-                array = compileSequence((DapSequence)dapvar,null,0);
+                array = compileSequence((DapSequence) dapvar, null, 0);
             else
                 array = compileSequenceArray(dapvar);
         }
@@ -117,18 +123,18 @@ public class DataCompiler
         return array;
     }
 
-    protected D4DataAtomic
+    protected DataAtomic
     compileAtomicVar(DapVariable dapvar)
-        throws DapException
+            throws DapException
     {
         DapAtomicVariable atomvar = (DapAtomicVariable) dapvar;
         DapType daptype = atomvar.getBaseType();
-        D4DataAtomic data = new D4DataAtomic(this.dsp, atomvar, databuffer.position());
+        DataAtomic data = factory.newAtomic(this.dsp, atomvar, databuffer.position());
         long total;
         long dimproduct = data.getCount();
         if(!daptype.isEnumType() && !daptype.isFixedSize()) {
             // this is a string, url, or opaque
-            int[] positions = new int[(int)dimproduct];
+            int[] positions = new int[(int) dimproduct];
             int savepos = databuffer.position();
             // Walk the bytestring and return the instance count (in databuffer)
             total = walkByteStrings(positions, databuffer);
@@ -145,19 +151,19 @@ public class DataCompiler
      * Compile a structure array.
      *
      * @param dapvar the template
-     * @return A D4DataCompoundArray for the databuffer for this struct.
+     * @return A DataCompoundArray for the databuffer for this struct.
      * @throws DapException
      */
-    D4DataCompoundArray
+    DataCompoundArray
     compileStructureArray(DapVariable dapvar)
-        throws DapException
+            throws DapException
     {
-        D4DataCompoundArray structarray
-            = new D4DataCompoundArray(this.dsp, dapvar);
+        DataCompoundArray structarray
+                = factory.newCompoundArray(this.dsp, dapvar);
         DapStructure struct = (DapStructure) dapvar;
         long dimproduct = structarray.getCount();
-        for(int i = 0;i < dimproduct;i++) {
-            D4DataStructure instance = compileStructure(struct,structarray,i);
+        for(int i = 0; i < dimproduct; i++) {
+            DataStructure instance = compileStructure(struct, structarray, i);
             structarray.addElement(instance);
         }
         return structarray;
@@ -168,18 +174,18 @@ public class DataCompiler
      * Compile a structure instance.
      *
      * @param dapstruct The template
-     * @return A D4DataStructure for the databuffer for this struct.
+     * @return A DataStructure for the databuffer for this struct.
      * @throws DapException
      */
-    D4DataStructure
-    compileStructure(DapStructure dapstruct, D4DataCompoundArray array, int index)
-        throws DapException
+    DataStructure
+    compileStructure(DapStructure dapstruct, DataCompoundArray array, int index)
+            throws DapException
     {
-        D4DataStructure d4ds = new D4DataStructure(dsp,dapstruct,array,index);
+        DataStructure d4ds = factory.newStructure(dsp, dapstruct, array, index);
         List<DapVariable> dfields = dapstruct.getFields();
-        for(int m = 0;m < dfields.size();m++) {
+        for(int m = 0; m < dfields.size(); m++) {
             DapVariable dfield = dfields.get(m);
-            D4DataVariable dvfield = compileVar(dfield);
+            DataVariable dvfield = compileVar(dfield);
             d4ds.addField(m, dvfield);
         }
         return d4ds;
@@ -189,19 +195,19 @@ public class DataCompiler
      * Compile a sequence array.
      *
      * @param dapvar the template
-     * @return A D4DataCompoundArray for the databuffer for this sequence.
+     * @return A DataCompoundArray for the databuffer for this sequence.
      * @throws DapException
      */
-    D4DataCompoundArray
+    DataCompoundArray
     compileSequenceArray(DapVariable dapvar)
-        throws DapException
+            throws DapException
     {
         DapSequence dapseq = (DapSequence) dapvar;
-        D4DataCompoundArray seqarray
-            = new D4DataCompoundArray(this.dsp, dapseq);
+        DataCompoundArray seqarray
+                = factory.newCompoundArray(this.dsp, dapseq);
         long dimproduct = seqarray.getCount();
-        for(int i = 0;i < dimproduct;i++) {
-            DataSequence dseq = compileSequence(dapseq,seqarray,i);
+        for(int i = 0; i < dimproduct; i++) {
+            DataSequence dseq = compileSequence(dapseq, seqarray, i);
             seqarray.addElement(dseq);
         }
         return seqarray;
@@ -211,27 +217,27 @@ public class DataCompiler
      * Compile a sequence from a set of records.
      *
      * @param dapseq The template for this sequence
-     * @param array the parent compound array
-     * @param index within the parent compound array
-     * @return A D4DataSequence for the records for this sequence.
+     * @param array  the parent compound array
+     * @param index  within the parent compound array
+     * @return A DataSequence for the records for this sequence.
      * @throws DapException
      */
-    D4DataSequence
-    compileSequence(DapSequence dapseq, D4DataCompoundArray array, int index)
-        throws DapException
+    DataSequence
+    compileSequence(DapSequence dapseq, DataCompoundArray array, int index)
+            throws DapException
     {
         List<DapVariable> dfields = dapseq.getFields();
         // Get the count of the number of records
         long nrecs = getCount(databuffer);
-        D4DataSequence seq = new D4DataSequence(this.dsp,dapseq,array,index);
-        for(int r = 0;r < nrecs;r++) {
-            D4DataRecord rec = new D4DataRecord(this.dsp, dapseq, seq, r);
-            for(int m = 0;m < dfields.size();m++) {
+        DataSequence seq = factory.newSequence(this.dsp, dapseq, array, index);
+        for(int r = 0; r < nrecs; r++) {
+            DataRecord rec = factory.newRecord(this.dsp, dapseq, seq, r);
+            for(int m = 0; m < dfields.size(); m++) {
                 DapVariable dfield = dfields.get(m);
-                D4DataVariable dvfield = compileVar(dfield);
+                DataVariable dvfield = compileVar(dfield);
                 rec.addField(m, dvfield);
             }
-	    seq.addRecord(rec);
+            seq.addRecord(rec);
         }
         return seq;
     }
@@ -241,7 +247,7 @@ public class DataCompiler
 
     protected byte[]
     getChecksum(ByteBuffer data)
-        throws DapException
+            throws DapException
     {
         if(!ChecksumMode.enabled(RequestMode.DAP, checksummode)) return null;
         if(data.remaining() < CHECKSUMSIZE)
@@ -262,7 +268,7 @@ public class DataCompiler
     {
         long count = data.getLong();
         count = (count & 0xFFFFFFFF);
-        return (int)count;
+        return (int) count;
     }
 
     /**
@@ -285,7 +291,7 @@ public class DataCompiler
         long total = 0;
         int savepos = databuffer.position();
         // Walk each bytestring
-        for(int i = 0;i < count;i++) {
+        for(int i = 0; i < count; i++) {
             int pos = databuffer.position();
             positions[i] = pos;
             int size = getCount(databuffer);

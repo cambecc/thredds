@@ -4,9 +4,14 @@
 
 package dap4.dap4shared;
 
+import dap4.core.data.DSP;
+import dap4.core.data.DapDataFactory;
+import dap4.core.data.DataDataset;
 import dap4.core.dmr.DapDataset;
-import dap4.core.util.*;
-import org.apache.http.Header;
+import dap4.core.util.DapContext;
+import dap4.core.util.DapDump;
+import dap4.core.util.DapException;
+import dap4.core.util.DapUtil;
 import org.apache.http.HttpStatus;
 import ucar.httpservices.HTTPFactory;
 import ucar.httpservices.HTTPMethod;
@@ -15,20 +20,21 @@ import ucar.httpservices.HTTPUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.*;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Make a request to a server and convert the reply
  * to a DapDataset from the returned bytes.
  */
 
-public class HttpDSP extends D4DSP
+public class HttpDSP extends AbstractDSP
 {
 
     //////////////////////////////////////////////////
     // Constants
+
+    static protected final boolean DEBUG = false;
 
     static protected final String DAPVERSION = "4.0";
     static protected final String DMRVERSION = "1.0";
@@ -48,11 +54,11 @@ public class HttpDSP extends D4DSP
     static protected final int DFALTPRELOADSIZE = 50000; // databuffer
 
     static protected final String[] DAPEXTENSIONS = new String[]{
-        "dmr", "dap", "dds", "das", "ddx", "dods"
+            "dmr", "dap", "dds", "das", "ddx", "dods"
     };
 
     static protected final String[] DAP4EXTENSIONS = new String[]{
-        "dmr", "dap"
+            "dmr", "dap"
     };
 
     //////////////////////////////////////////////////
@@ -64,6 +70,8 @@ public class HttpDSP extends D4DSP
 
     protected int status = HttpStatus.SC_OK;    // response
     protected XURI xuri = null;
+
+    protected Object context = null;
 
     //////////////////////////////////////////////////
     // Constructor(s)
@@ -90,7 +98,7 @@ public class HttpDSP extends D4DSP
         try {
             XURI xuri = new XURI(url);
             return (xuri.getLeadProtocol().equals(DAP4PROTO)
-                || xuri.getParameters().get(PROTOTAG).equals(DAP4PROTO));
+                    || xuri.getParameters().get(PROTOTAG).equals(DAP4PROTO));
         } catch (URISyntaxException use) {
         }
         return false;
@@ -114,6 +122,15 @@ public class HttpDSP extends D4DSP
     {
     }
 
+    /////////////////////////////////////////
+    // AbstractDSP extensions
+
+    public DapDataFactory
+    getDataFactory()
+    {
+        throw new UnsupportedOperationException();
+    }
+
     /*@Override
     public String getPath()
     {
@@ -131,7 +148,7 @@ public class HttpDSP extends D4DSP
 
     protected void
     build()
-        throws DapException
+            throws DapException
     {
         String methodurl = buildURL(this.xuri.assemble(XURI.URLONLY), DATASUFFIX, this.dmr, this.basece);
         this.checksummode = ChecksumMode.modeFor(xuri.getParameters().get(CHECKSUMTAG));
@@ -174,7 +191,7 @@ public class HttpDSP extends D4DSP
 
     protected InputStream
     callServer(String methodurl)
-        throws DapException
+            throws DapException
     {
         URI uri;
 
@@ -199,7 +216,7 @@ public class HttpDSP extends D4DSP
             if(this.status != HttpStatus.SC_OK) {
                 String msg = method.getResponseAsString();
                 throw new DapException("Request failure: " + method.getStatusText() + ": " + methodurl)
-                    .setCode(status);
+                        .setCode(status);
             }
             // Pull headers of interest
             /*not legal
@@ -228,7 +245,7 @@ public class HttpDSP extends D4DSP
 
     public String
     getCapabilities(String url)
-        throws IOException
+            throws IOException
     {
         // Save the original url
         String saveurl = this.xuri.getOriginal();
@@ -270,7 +287,7 @@ public class HttpDSP extends D4DSP
 
     protected void
     setURL(String url)
-        throws DapException
+            throws DapException
     {
         try {
             this.xuri = new XURI(url);

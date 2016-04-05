@@ -12,7 +12,7 @@ import dap4.core.dmr.TypeSort;
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
 import dap4.core.util.Slice;
-import dap4.dap4shared.D4DataAtomic;
+import dap4.core.data.DataAtomic;
 import ucar.ma2.DataType;
 import ucar.ma2.ForbiddenConversionException;
 import ucar.ma2.InvalidRangeException;
@@ -507,14 +507,14 @@ abstract public class CDMUtil
      * is presumed correct.
      *
      * @param atomtype type of object to extract ; must not be Enum
-     * @param dataset  D4Data containing the objects
+     * @param dataset  Data containing the objects
      * @param index    Which element of dataset to read
      * @return resulting value as an Object; value does not necessarily conform
      * to Convert.ValueClass.
      */
 
     static Object
-    extractObject(TypeSort atomtype, D4DataAtomic dataset, long index)
+    extractObject(TypeSort atomtype, DataAtomic dataset, long index)
             throws DataException
     {
         try {
@@ -531,14 +531,14 @@ abstract public class CDMUtil
      * is presumed correct.
      *
      * @param atomtype type of object to extract
-     * @param dataset  D4Data containing the objects
+     * @param dataset  Data containing the objects
      * @param index    Which element of dataset to read
      * @return resulting value as a long
      * @throws ForbiddenConversionException if cannot convert to long
      */
 
     static public long
-    extractLongValue(TypeSort atomtype, D4DataAtomic dataset, long index)
+    extractLongValue(TypeSort atomtype, DataAtomic dataset, long index)
             throws DataException
     {
         Object result;
@@ -593,14 +593,14 @@ abstract public class CDMUtil
      * is presumed correct.
      *
      * @param atomtype type of object to extract
-     * @param dataset  D4Data containing the objects
+     * @param dataset  Data containing the objects
      * @param index    Which element of dataset to read
      * @return resulting value as a double
      * @throws ForbiddenConversionException if cannot convert to double
      */
 
     static public double
-    extractDoubleValue(TypeSort atomtype, D4DataAtomic dataset, int index)
+    extractDoubleValue(TypeSort atomtype, DataAtomic dataset, int index)
             throws DataException
     {
         Object result;
@@ -626,7 +626,7 @@ abstract public class CDMUtil
      * Extract, as an object, n consecutive values
      * of an atomic typed array of values
      *
-     * @param dataset  D4Data containing the objects
+     * @param dataset  Data containing the objects
      * @param index    Starting element to read
      * @param count    Number of elements to read
      * @return resulting array of values as an object
@@ -634,7 +634,7 @@ abstract public class CDMUtil
 
     /*
     static public Object
-    extractVector(D4DataAtomic dataset, long index, long count, long offset)
+    extractVector(DataAtomic dataset, long index, long count, long offset)
         throws DataException
     {
         Object vector = createVector(dataset.getType().getPrimitiveType(),count);

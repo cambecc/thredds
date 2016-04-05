@@ -14,7 +14,7 @@ import dap4.core.dmr.ErrorResponse;
 import dap4.core.util.DapException;
 import dap4.core.util.DapUtil;
 import dap4.core.util.ResponseFormat;
-import dap4.dap4shared.DSP;
+import dap4.core.data.DSP;
 import dap4.dap4shared.DapLog;
 import dap4.dap4shared.DapProtocol;
 import dap4.dap4shared.RequestMode;

@@ -4,6 +4,8 @@
 
 package   dap4.cdm;
 
+import dap4.core.data.DSP;
+import dap4.core.data.DataAtomic;
 import dap4.core.dmr.*;
 import dap4.core.util.*;
 import dap4.dap4shared.*;
@@ -28,12 +30,12 @@ public class CDMArrayAtomic extends Array implements CDMArray
 
     // CDMArry variables
     protected CDMDataset root = null;
-    protected D4DSP dsp = null;
+    protected DSP dsp = null;
     protected DapVariable template = null;
     protected long bytesize = 0;
     protected DapType basetype = null;
 
-    protected D4DataAtomic d4data = null;
+    protected DataAtomic d4data = null;
     protected int elementsize = 0;    // of one element
     protected long dimsize = 0;        // # of elements in array; scalar uses value 1
     protected long totalsize = 0;      // elementsize*dimsize except when isbytestring
@@ -58,7 +60,7 @@ public class CDMArrayAtomic extends Array implements CDMArray
      * @param dsp    the parent DSP
      * @param d4data the dap4 databuffer object that provided the actual databuffer
      */
-    CDMArrayAtomic(D4DSP dsp, CDMDataset root, D4DataAtomic d4data)
+    CDMArrayAtomic(DSP dsp, CDMDataset root, DataAtomic d4data)
     {
         super( CDMUtil.daptype2cdmtype(((DapVariable) d4data.getTemplate()).getBaseType()),
                 CDMUtil.computeEffectiveShape(((DapVariable) d4data.getTemplate()).getDimensions()));
@@ -118,7 +120,7 @@ public class CDMArrayAtomic extends Array implements CDMArray
         return dimsize;
     }
 
-    public D4DataAtomic getData()
+    public DataAtomic getData()
     {
         return d4data;
     }

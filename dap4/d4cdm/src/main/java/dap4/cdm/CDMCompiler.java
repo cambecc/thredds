@@ -5,8 +5,7 @@
 
 package dap4.cdm;
 
-import dap4.core.data.DataSort;
-import dap4.core.data.DataVariable;
+import dap4.core.data.*;
 import dap4.core.dmr.*;
 import dap4.core.util.*;
 import dap4.dap4shared.*;
@@ -45,10 +44,11 @@ public class CDMCompiler
     // Instance variables
 
     DapNetcdfFile ncfile = null;
-    D4DSP dsp = null;
+    DSP dsp = null;
     DapDataset dmr = null;
-    D4DataDataset d4root = null;
+    DataDataset d4root = null;
     CDMDataset cdmroot = null;
+    DapDataFactory factory = null;
 
     NodeMap nodemap = new NodeMap();
 
@@ -60,14 +60,15 @@ public class CDMCompiler
      *
      * @param ncfile the target NetcdfFile
      * @param dsp    the compiled D4 databuffer
+     * @param factory    the node building factory
      */
 
-    public CDMCompiler(DapNetcdfFile ncfile, D4DSP dsp)
+    public CDMCompiler(DapNetcdfFile ncfile, DSP dsp, DapDataFactory factory)
             throws DapException
     {
         this.ncfile = ncfile;
         this.dsp = dsp;
-        this.d4root = (D4DataDataset) dsp.getDataDataset();
+        this.d4root = (DataDataset) dsp.getDataDataset();
         this.dmr = dsp.getDMR();
     }
 
@@ -110,7 +111,7 @@ public class CDMCompiler
         //cdmroot = new CDMDataset();
         compileDMR();
         // iterate over the variables represented in the databuffer
-        List<D4DataVariable> vars = d4root.getTopVariables();
+        List<DataVariable> vars = this.d4root.getTopVariables();
         for(DataVariable var : vars) {
             Variable cdmvar = (Variable) nodemap.get(var.getTemplate());
             Array array = compileVar(var);
@@ -129,16 +130,16 @@ public class CDMCompiler
             array = compileAtomicVar(d4var);
             break;
         case SEQUENCE:
-            array = compileSequenceArray((D4DataVariable) d4var);
+            array = compileSequenceArray((DataVariable) d4var);
             break;
         case STRUCTURE:
-            array = compileStructureArray((D4DataVariable) d4var);
+            array = compileStructureArray((DataVariable) d4var);
             break;
         case COMPOUNDARRAY:
             if(dapvar.getSort() == DapSort.STRUCTURE)
-                array = compileStructureArray((D4DataVariable) d4var);
+                array = compileStructureArray((DataVariable) d4var);
             else if(dapvar.getSort() == DapSort.SEQUENCE)
-                array = compileSequenceArray((D4DataVariable) d4var);
+                array = compileSequenceArray((DataVariable) d4var);
             break;
         default:
             assert false : "Unexpected databuffer sort: " + d4var.getSort();
@@ -165,7 +166,7 @@ public class CDMCompiler
     compileAtomicVar(DataVariable d4var)
             throws DapException
     {
-        CDMArrayAtomic array = new CDMArrayAtomic(this.dsp, this.cdmroot, (D4DataAtomic) d4var);
+        CDMArrayAtomic array = new CDMArrayAtomic(this.dsp, this.cdmroot, (DataAtomic) d4var);
         return array;
     }
 
@@ -181,7 +182,7 @@ public class CDMCompiler
      * @throws DapException
      */
     protected CDMArray
-    compileStructure(D4DataStructure d4var, int recno, CDMArrayStructure container)
+    compileStructure(DataStructure d4var, int recno, CDMArrayStructure container)
             throws DapException
     {
         assert (d4var.getSort() == DataSort.STRUCTURE);
@@ -208,7 +209,7 @@ public class CDMCompiler
      * @throws DapException
      */
     protected Array
-    compileStructureArray(D4DataVariable d4var)
+    compileStructureArray(DataVariable d4var)
             throws DapException
     {
         DapStructure dapstruct = (DapStructure) d4var.getTemplate();
@@ -216,21 +217,21 @@ public class CDMCompiler
         long dimproduct;
         if(dimset == null || dimset.size() == 0) {// scalar
             assert (d4var.getSort() == DataSort.STRUCTURE);
-            D4DataStructure d4struct = (D4DataStructure) d4var;
+            DataStructure d4struct = (DataStructure) d4var;
             // Create a 1-element compound array
-            D4DataCompoundArray dca = new D4DataCompoundArray(this.dsp, dapstruct);
+            DataCompoundArray dca = new DataCompoundArray(this.dsp, dapstruct);
             dca.addElement(d4struct);
             d4var = dca;
             dimproduct = 1;
         } else
             dimproduct = DapUtil.dimProduct(dimset);
         assert (d4var.getSort() == DataSort.COMPOUNDARRAY);
-        D4DataCompoundArray d4array = (D4DataCompoundArray) d4var;
+        DataCompoundArray d4array = (DataCompoundArray) d4var;
         CDMArrayStructure arraystruct
                 = new CDMArrayStructure(this.dsp, this.cdmroot, d4array);
         try {
             for(int i = 0; i < dimproduct; i++) {
-                D4DataStructure dds = (D4DataStructure) d4array.read(i);
+                DataStructure dds = (DataStructure) d4array.read(i);
                 compileStructure(dds, i, arraystruct);
             }
             arraystruct.finish();
@@ -252,7 +253,7 @@ public class CDMCompiler
      */
 
     protected CDMArraySequence
-    compileSequence(D4DataSequence d4var)
+    compileSequence(DataSequence d4var)
             throws DapException
     {
         assert (d4var.getSort() == DataSort.SEQUENCE);
@@ -261,9 +262,9 @@ public class CDMCompiler
         long nrecs = d4var.getRecordCount();
         // Fill in the record fields
         for(int recno = 0; recno < nrecs; recno++) {
-            D4DataRecord rec = (D4DataRecord) d4var.readRecord(recno);
+            DataRecord rec = (DataRecord) d4var.readRecord(recno);
             for(int fieldno = 0; fieldno < dapseq.getFields().size(); fieldno++) {
-                D4DataVariable field = (D4DataVariable) rec.readfield(fieldno);
+                DataVariable field = (DataVariable) rec.readfield(fieldno);
                 // compile the field to get an array
                 container.addField(recno, fieldno, compileVar(field));
             }
@@ -286,13 +287,13 @@ public class CDMCompiler
      */
 
     protected Array
-    compileSequenceArray(D4DataVariable d4var)
+    compileSequenceArray(DataVariable d4var)
             throws DapException
     {
         Array array = null;
 
         if(d4var.getSort() == DataSort.SEQUENCE) {// scalar
-            array = compileSequence((D4DataSequence) d4var);
+            array = compileSequence((DataSequence) d4var);
         } else if(d4var.getSort() == DataSort.COMPOUNDARRAY) {
             throw new DapException("Only Sequence{...}(*) supported");
         } else

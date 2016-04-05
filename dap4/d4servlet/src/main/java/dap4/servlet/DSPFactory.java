@@ -5,7 +5,7 @@ package dap4.servlet;
 
 import dap4.core.util.DapContext;
 import dap4.core.util.DapException;
-import dap4.dap4shared.DSP;
+import dap4.core.data.DSP;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

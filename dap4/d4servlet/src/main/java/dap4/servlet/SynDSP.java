@@ -4,6 +4,8 @@
 
 package dap4.servlet;
 
+import dap4.core.data.DSP;
+import dap4.core.data.DapDataFactory;
 import dap4.core.util.*;
 import dap4.dap4shared.*;
 
@@ -15,8 +17,10 @@ import java.nio.ByteOrder;
  * Provide a DSP interface to synthetic data (see Generator.java).
  */
 
-public class SynDSP extends D4DSP
+public class SynDSP extends AbstractDSP
 {
+    static final protected boolean DEBUG=false;
+
     static protected final String[] SYNEXTENSIONS = new String[]{
         ".dmr", ".syn"
     };
@@ -99,6 +103,14 @@ public class SynDSP extends D4DSP
         } catch (IOException ioe) {
             throw new DapException(ioe);
         }
+    }
+
+    ///////////////////////////
+    // AbstractDSP Extensions
+    @Override
+    public DapDataFactory getDataFactory()
+    {
+        throw new UnsupportedOperationException();
     }
 
 }

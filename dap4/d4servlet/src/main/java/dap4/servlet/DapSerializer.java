@@ -8,7 +8,7 @@ import dap4.ce.CEConstraint;
 import dap4.core.data.*;
 import dap4.core.dmr.*;
 import dap4.core.util.*;
-import dap4.dap4shared.DSP;
+import dap4.core.data.DSP;
 import dap4.dap4shared.Dap4Util;
 
 import java.io.ByteArrayOutputStream;

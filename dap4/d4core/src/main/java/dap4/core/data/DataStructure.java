@@ -13,6 +13,8 @@ DataStructure represents a single instance of a structure.
 
 public interface DataStructure extends DataCompound
 {
+    public void addField(int fieldno, DataVariable dvfield);
+
     // Read ith field
     public DataVariable readfield(int i) throws DataException;
 

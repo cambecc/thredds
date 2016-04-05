@@ -8,9 +8,9 @@ import dap4.core.dmr.DapStructure;
 import dap4.core.dmr.DapType;
 import dap4.core.dmr.DapVariable;
 import dap4.core.dmr.TypeSort;
-import dap4.dap4shared.D4DSP;
-import dap4.dap4shared.D4DataSequence;
-import dap4.dap4shared.DSP;
+import dap4.core.data.DSP;
+import dap4.core.data.DataSequence;
+import dap4.core.data.DSP;
 import ucar.ma2.*;
 
 import java.io.IOException;
@@ -96,12 +96,12 @@ public class CDMArraySequence extends ArraySequence implements CDMArray
     // Instance variables
 
     protected CDMDataset root = null;
-    protected D4DSP dsp = null;
+    protected DSP dsp = null;
     protected DapVariable template = null;
     protected long bytesize = 0;
     protected DapType basetype = null;
 
-    protected D4DataSequence d4data = null;
+    protected DataSequence d4data = null;
     protected long nmembers = 0;
 
     /**
@@ -126,7 +126,7 @@ public class CDMArraySequence extends ArraySequence implements CDMArray
      * @param root     the parent CDMDataset
      * @param template the structure template
      */
-    CDMArraySequence(D4DSP dsp, CDMDataset root, DapStructure template, D4DataSequence d4data)
+    CDMArraySequence(DSP dsp, CDMDataset root, DapStructure template, DataSequence d4data)
     {
         super(CDMArrayStructure.computemembers((DapStructure) d4data.getTemplate()),
                 new SDI(), (int) d4data.getRecordCount());

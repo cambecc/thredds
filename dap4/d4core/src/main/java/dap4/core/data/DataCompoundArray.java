@@ -33,6 +33,8 @@ public interface DataCompoundArray extends DataVariable
      */
     public long getCount();
 
+    public void addElement(DataCompound instance);
+
     /**
      *  Read multiple values at once.
      *  The returned value (parameter "data") is some form of array of DataCompound objects.

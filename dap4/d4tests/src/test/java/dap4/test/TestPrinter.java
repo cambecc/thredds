@@ -7,7 +7,7 @@ package dap4.test;
 import dap4.cdm.DapNetcdfFile;
 import dap4.core.dmr.DapDataset;
 import dap4.core.util.*;
-import dap4.dap4shared.DSP;
+import dap4.core.data.DSP;
 import dap4.servlet.DMRPrint;
 import dap4.dap4shared.D4DSP;
 import ucar.nc2.*;

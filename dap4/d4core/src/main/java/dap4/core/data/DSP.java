@@ -2,7 +2,7 @@
    See the LICENSE file for more information.
 */
 
-package dap4.dap4shared;
+package dap4.core.data;
 
 import dap4.core.data.DataDataset;
 import dap4.core.data.DataVariable;
@@ -33,6 +33,7 @@ public interface DSP
     public DapDataset getDMR() throws DapException;
 
     public DataDataset getDataDataset() throws IOException;
+    public void setDataDataset(DataDataset ds);
 
     public void close() throws IOException;
 

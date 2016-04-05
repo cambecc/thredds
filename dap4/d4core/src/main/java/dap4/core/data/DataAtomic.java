@@ -37,6 +37,9 @@ public interface DataAtomic extends DataVariable
      */
     public long getElementSize();
 
+    public void setByteStringOffsets(long total, int[] positions);
+
+
     /**
      *  Read of multiple values at once.
      *  The returned value (parameter "data") is some form of java array (e.g. int[]).

@@ -4,11 +4,15 @@
 
 package dap4.dap4shared;
 
-import dap4.core.util.*;
-import dap4.dap4shared.*;
-import ucar.httpservices.HTTPUtil;
+import dap4.core.data.DSP;
+import dap4.core.data.DapDataFactory;
+import dap4.core.data.DataDataset;
+import dap4.core.util.DapContext;
+import dap4.core.util.DapException;
+import dap4.core.util.DapUtil;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.ByteOrder;
 
@@ -16,13 +20,15 @@ import java.nio.ByteOrder;
  * Provide a DSP interface to synthetic data (see Generator.java).
  */
 
-public class FileDSP extends D4DSP
+public class FileDSP extends AbstractDSP
 {
     //////////////////////////////////////////////////
     // Instance variables
 
     //Coverity[FB.URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD]
     protected byte[] raw = null; // Complete serialized binary databuffer
+
+    protected Object context = null;
 
     //////////////////////////////////////////////////
     // Constructor(s)
@@ -70,7 +76,9 @@ public class FileDSP extends D4DSP
             if(filepath.startsWith("file:"))
                 filepath = filepath.substring("file:".length());
             while(filepath.startsWith("/")) // remove all leading slashes
+            {
                 filepath = filepath.substring(1);
+            }
             // Absolutize
             if(!DapUtil.hasDriveLetter(filepath))
                 filepath = "/" + filepath;
@@ -88,5 +96,12 @@ public class FileDSP extends D4DSP
             throw new DapException(ioe);
         }
     }
+
+    public DapDataFactory
+    getDataFactory()
+    {
+        throw new UnsupportedOperationException();
+    }
+
 
 }

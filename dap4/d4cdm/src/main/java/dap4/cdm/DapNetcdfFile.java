@@ -4,6 +4,7 @@
 
 package dap4.cdm;
 
+import dap4.core.data.DSP;
 import dap4.core.util.DapUtil;
 import dap4.dap4shared.*;
 import ucar.ma2.*;
@@ -65,7 +66,7 @@ public class DapNetcdfFile extends ucar.nc2.NetcdfFile
     protected String originalurl = null;
     protected String finalurl = null;
     protected XURI xuri = null;
-    protected D4DSP dsp = null;
+    protected DSP dsp = null;
 
     protected CancelTask cancel = null;
 
@@ -124,13 +125,13 @@ public class DapNetcdfFile extends ucar.nc2.NetcdfFile
         cancel = (cancelTask == null ? nullcancel : cancelTask);
         // 1. Get and parse the constrained DMR and Data v-a-v URL
         if(xuri.isFile())
-            this.dsp = (D4DSP) new FileDSP().open(url);
+            this.dsp = (DSP) new FileDSP().open(url);
         else
-            this.dsp = (D4DSP) new HttpDSP().open(url);
+            this.dsp = (DSP) new HttpDSP().open(url);
 
         // 2. Construct an equivalent CDM tree and populate 
         //    this NetcdfFile object.
-        CDMCompiler compiler = new CDMCompiler(this, this.dsp);
+        CDMCompiler compiler = new CDMCompiler(this, this.dsp, new DefaultDataFactory());
         compiler.compile(arraymap);
         // set the pseudo-location, otherwise we get a name that is full path.
         setLocation(this.dsp.getDMR().getDataset().getShortName());

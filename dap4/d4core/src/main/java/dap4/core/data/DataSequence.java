@@ -14,6 +14,8 @@ public interface DataSequence extends DataCompound
 {
     public long getRecordCount();
 
+    public void addRecord(DataRecord r);
+
     // Read a single record
     public DataRecord readRecord(long recordno) throws DataException;
 }

@@ -5,8 +5,8 @@
 package dap4.cdm;
 
 import dap4.core.dmr.*;
-import dap4.dap4shared.DSP;
-import dap4.dap4shared.D4DSP;
+import dap4.core.data.DSP;
+import dap4.core.data.DSP;
 
 /**
  * Since we can't use AbstractCDMArray,
@@ -21,7 +21,7 @@ import dap4.dap4shared.D4DSP;
 class CDMArrayDelegate implements CDMArray
 {
     protected CDMDataset root = null;
-    protected D4DSP dsp = null;
+    protected DSP dsp = null;
     protected DapVariable template = null;
     protected long bytesize = 0;
     protected DapType basetype = null;

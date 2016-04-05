@@ -8,6 +8,8 @@ package dap4.core.util;
  * Define an enumeration for all the DapNode subclasses to
  * avoid use of instanceof().  Note that this mixes
  * DAP2 and DAP4 for eventual joint support.
+ * TODO: verify that this is faster than using instanceof, and if not,
+ * go back to using instanceof.
  */
 
 import dap4.core.dmr.*;

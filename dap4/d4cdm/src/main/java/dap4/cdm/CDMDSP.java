@@ -4,16 +4,13 @@
 
 package dap4.cdm;
 
-import dap4.core.data.DataDataset;
-import dap4.core.data.DataException;
-import dap4.core.data.DataVariable;
+import dap4.core.data.*;
 import dap4.core.dmr.*;
 import dap4.core.util.DapContext;
 import dap4.core.util.DapException;
 import dap4.core.util.DapSort;
 import dap4.core.util.DapUtil;
 import dap4.dap4shared.AbstractDSP;
-import dap4.dap4shared.DSP;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayStructure;
 import ucar.ma2.DataType;
@@ -90,8 +87,6 @@ public class CDMDSP extends AbstractDSP
     protected NodeMap nodemap = new NodeMap();
 
     protected boolean closed = false;
-
-    protected CDMDataDataset data = null; // root of the DataXXX tree
 
     protected HttpServletRequest request = null;
     protected HttpServletResponse response = null;
@@ -180,11 +175,10 @@ public class CDMDSP extends AbstractDSP
             ncdfile.close();
     }
 
-    @Override
-    public DataDataset
-    getDataDataset()
+    public DapDataFactory
+    getDataFactory()
     {
-        return data;
+        throw new UnsupportedOperationException();
     }
 
     //////////////////////////////////////////////////
@@ -193,11 +187,6 @@ public class CDMDSP extends AbstractDSP
     public NetcdfDataset getNetcdfDataset()
     {
         return ncdfile;
-    }
-
-    public void setDataDataset(CDMDataDataset data)
-    {
-        this.data = data;
     }
 
     /**
@@ -697,7 +686,7 @@ public class CDMDSP extends AbstractDSP
         DapType basetype = CDMUtil.cdmtype2daptype(attr.getDataType());
         if(basetype == null)
             throw new DapException("DapFile: illegal CDM variable attribute type: " + attr.getDataType());
-        DapAttribute dapattr = factory.newAttribute(attr.getShortName(),basetype);
+        DapAttribute dapattr = factory.newAttribute(attr.getShortName(), basetype);
         recordNode(attr, dapattr);
         // Transfer the values
         Array values = attr.getValues();

@@ -4,6 +4,9 @@
 
 package dap4.cdm;
 
+import dap4.core.data.DSP;
+import dap4.core.data.DataAtomic;
+import dap4.core.data.DataCompoundArray;
 import dap4.core.dmr.*;
 import dap4.core.util.*;
 import dap4.dap4shared.*;
@@ -33,19 +36,19 @@ public class CDMArrayStructure extends ArrayStructure implements CDMArray
 
     // CDMArry variables
     protected CDMDataset root = null;
-    protected D4DSP dsp = null;
+    protected DSP dsp = null;
     protected DapVariable template = null;
     protected long bytesize = 0;
     protected DapType basetype = null;
 
-    protected D4DataCompoundArray d4data = null;
+    protected DataCompoundArray d4data = null;
     protected long dimsize = 0;
     protected long nmembers = 0;
 
     /**
      * Since we are using StructureData,
      * we do not actually need to keep the
-     * D4DataStructure instances as such.
+     * DataStructure instances as such.
      * We need a mapping from index X member to a
      * CDMArray object.
      * Total number of objects is dimsize * |members|.
@@ -65,7 +68,7 @@ public class CDMArrayStructure extends ArrayStructure implements CDMArray
      * @param root   the parent CDMDataset
      * @param d4data the structure data
      */
-    CDMArrayStructure(D4DSP dsp, CDMDataset root, D4DataCompoundArray d4data)
+    CDMArrayStructure(DSP dsp, CDMDataset root, DataCompoundArray d4data)
     {
         super(computemembers((DapStructure) d4data.getTemplate()),
                 CDMUtil.computeEffectiveShape(((DapVariable) d4data.getTemplate()).getDimensions()));
@@ -295,7 +298,7 @@ public class CDMArrayStructure extends ArrayStructure implements CDMArray
         CDMArrayAtomic array = getAtomicArray(recnum, m);
         if(!array.getBaseType().isNumericType())
             throw new IllegalArgumentException("Cannot convert non-numeric type");
-        D4DataAtomic data = array.getData();
+        DataAtomic data = array.getData();
         DapType atomtype = data.getType();
         long nelems = data.getCount();
         try {
@@ -311,7 +314,7 @@ public class CDMArrayStructure extends ArrayStructure implements CDMArray
     public float[]
     getJavaArrayFloat(int index, StructureMembers.Member m)
     {
-        D4DataAtomic data = getAtomicArray(index, m).getData();
+        DataAtomic data = getAtomicArray(index, m).getData();
         DapType atype = data.getType();
         long count = atype.getSize();
         try {
@@ -327,7 +330,7 @@ public class CDMArrayStructure extends ArrayStructure implements CDMArray
     public byte[]
     getJavaArrayByte(int index, StructureMembers.Member m)
     {
-        D4DataAtomic data = getAtomicArray(index, m).getData();
+        DataAtomic data = getAtomicArray(index, m).getData();
         DapType atype = data.getType();
         long count = atype.getSize();
         try {
@@ -343,7 +346,7 @@ public class CDMArrayStructure extends ArrayStructure implements CDMArray
     public short[]
     getJavaArrayShort(int index, StructureMembers.Member m)
     {
-        D4DataAtomic data = getAtomicArray(index, m).getData();
+        DataAtomic data = getAtomicArray(index, m).getData();
         DapType atype = data.getType();
         long count = atype.getSize();
         try {
@@ -359,7 +362,7 @@ public class CDMArrayStructure extends ArrayStructure implements CDMArray
     public int[]
     getJavaArrayInt(int index, StructureMembers.Member m)
     {
-        D4DataAtomic data = getAtomicArray(index, m).getData();
+        DataAtomic data = getAtomicArray(index, m).getData();
         DapType atype = data.getType();
         long count = atype.getSize();
         try {
@@ -375,7 +378,7 @@ public class CDMArrayStructure extends ArrayStructure implements CDMArray
     public long[]
     getJavaArrayLong(int index, StructureMembers.Member m)
     {
-        D4DataAtomic data = getAtomicArray(index, m).getData();
+        DataAtomic data = getAtomicArray(index, m).getData();
         DapType atype = data.getType();
         long count = atype.getSize();
         try {
@@ -391,7 +394,7 @@ public class CDMArrayStructure extends ArrayStructure implements CDMArray
     public char[]
     getJavaArrayChar(int index, StructureMembers.Member m)
     {
-        D4DataAtomic data = getAtomicArray(index, m).getData();
+        DataAtomic data = getAtomicArray(index, m).getData();
         DapType atype = data.getType();
         long count = atype.getSize();
         try {
@@ -407,7 +410,7 @@ public class CDMArrayStructure extends ArrayStructure implements CDMArray
     public String[]
     getJavaArrayString(int index, StructureMembers.Member m)
     {
-        D4DataAtomic data = getAtomicArray(index, m).getData();
+        DataAtomic data = getAtomicArray(index, m).getData();
         DapType atype = data.getType();
         long count = atype.getSize();
         try {
@@ -423,7 +426,7 @@ public class CDMArrayStructure extends ArrayStructure implements CDMArray
     public ByteBuffer[]
     getJavaArrayOpaque(int index, StructureMembers.Member m)
     {
-        D4DataAtomic data = getAtomicArray(index, m).getData();
+        DataAtomic data = getAtomicArray(index, m).getData();
         DapType atype = data.getType();
         long count = atype.getSize();
         try {
