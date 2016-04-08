@@ -1430,7 +1430,7 @@ public class Nc4Iosp extends AbstractIOServiceProvider implements IOServiceProvi
         Map<Integer, String> map = makeEnum(grpid, typeid);
         ut.e = new EnumTypedef(name, map, ut.getEnumBaseType());
         g.addEnumeration(ut.e);
-
+	ut.e.annotate("UserType",ut);
       } else if (utype == Nc4prototypes.NC_OPAQUE) {
         byte[] nameo = new byte[Nc4prototypes.NC_MAX_NAME + 1];
         SizeTByReference sizep2 = new SizeTByReference();
