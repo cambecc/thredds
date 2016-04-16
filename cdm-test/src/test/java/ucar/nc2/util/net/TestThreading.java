@@ -36,19 +36,23 @@ import org.junit.Test;
 import ucar.httpservices.HTTPFactory;
 import ucar.httpservices.HTTPMethod;
 import ucar.httpservices.HTTPSession;
-import ucar.nc2.util.UnitTestCommon;
+import ucar.nc2.util.CommonTestUtils;
 
 /**
  * Test interaction of multi-threading with httpservices.
  */
-public class TestThreading extends UnitTestCommon
+public class TestThreading extends CommonTestUtils
 {
     //////////////////////////////////////////////////.
     // Constants
 
-    static public final boolean DEBUG = true;
+    static public final boolean DEBUG = false;
 
-    static protected final int DFALTNTHREADS = 100;
+    static public final boolean AWAIT = true;
+
+
+    static protected final int DFALTTHREADS = 100;
+    static protected final int DFALTMAXCONNS = (DFALTTHREADS/2);
 
     static protected final String DFALTSERVER = "http://remotetest.unidata.ucar.edu";
 
@@ -63,7 +67,7 @@ public class TestThreading extends UnitTestCommon
 
     protected String[] testurls;
 
-    protected int nthreads = DFALTNTHREADS;
+    protected int nthreads = DFALTTHREADS;
 
     //////////////////////////////////////////////////
 
@@ -78,7 +82,7 @@ public class TestThreading extends UnitTestCommon
                     throw new NumberFormatException();
             } catch (NumberFormatException e) {
                 System.err.println("-Dnthreads value must be positive integer: " + sn);
-                this.nthreads = DFALTNTHREADS;
+                this.nthreads = DFALTTHREADS;
             }
         }
         definetests();
@@ -96,8 +100,9 @@ public class TestThreading extends UnitTestCommon
 
     @Test
     public void
-    testThreading1()
+    testThreadingN()
     {
+        HTTPSession.setGlobalMaxConnections(DFALTMAXCONNS);
         try {
             Thread[] runners = new Thread[this.nthreads];
             try (HTTPSession session = HTTPFactory.newSession(DFALTSERVER)) {
@@ -106,21 +111,74 @@ public class TestThreading extends UnitTestCommon
                 //session.setSOTimeout(10000);
                 for(int i = 0; i < this.nthreads; i++) {
                     if(DEBUG)
-                        System.err.printf("[%d]: %s%n", i, testurls[i] );
+                        System.err.printf("[%d]: %s%n", i, testurls[i]);
                     runners[i] = new Thread(new Runner(session, testurls[i], i));
                     runners[i].start();
                 }
-                Thread.sleep(nthreads * 1 * 1000);
-                for(int i = 0; i < this.nthreads; i++) {
-                    Thread t = runners[i];
-                    if(t.isAlive()) {
-                        System.err.printf("[i] forced %n");
-                        t.interrupt();
+                if(AWAIT) {
+                    Thread.sleep(nthreads * 100);
+                    boolean[] state = new boolean[this.nthreads];
+                    for(int i = 0; i < this.nthreads; i++) {
+                        Thread t = runners[i];
+                        state[i] = t.isAlive();
                     }
-                    t.join();
+                    if(DEBUG)
+                        for(int i = 0; i < this.nthreads; i++) {
+                            System.err.printf("[%d]: %s%n", i, (state[i] ? "up" : "down"));
+                        }
+                    for(int i = 0; i < this.nthreads; i++) {
+                        Thread t = runners[i];
+                        if(t.isAlive()) {
+                            System.err.printf("[%d] forced %n");
+                            t.interrupt();
+                        }
+                        t.join();
+                    }
+                } else {
+                    for(; ; ) {
+                        int upcount = 0;
+                        for(int i = 0; i < this.nthreads; i++) {
+                            Thread t = runners[i];
+                            if(t.isAlive())
+                                upcount++;
+                            else t.join();
+                        }
+                        if(upcount == 0) break;
+                        System.err.println("upcount=" + upcount);
+                        System.err.flush();
+                        Thread.sleep(1 * 1000);
+                    }
                 }
-                System.err.println("All threads terminated");
             }
+            System.err.println("All threads terminated");
+            HTTPSession.validatestate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void
+    testThreading1()
+    {
+        try {
+            Runner[] runners = new Runner[this.nthreads];
+            try (HTTPSession session = HTTPFactory.newSession(DFALTSERVER)) {
+                // Set some timeouts
+                //session.setConnectionTimeout(10000);
+                //session.setSOTimeout(10000);
+                for(int i = 0; i < this.nthreads; i++) {
+                    if(DEBUG)
+                        System.err.printf("[%d]: %s%n", i, testurls[i]);
+                    runners[i] = new Runner(session, testurls[i], i);
+                }
+                for(int i = 0; i < this.nthreads; i++) {
+                    Runner runner = runners[i];
+                    runner.run();
+                }
+            }
+            System.err.println("All threads terminated");
+            HTTPSession.validatestate();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -146,11 +204,19 @@ public class TestThreading extends UnitTestCommon
             try {
                 try (HTTPMethod m = HTTPFactory.Head(session, this.url)) {
                     int status = m.execute();
+                    Assert.assertTrue("Bad return code: " + status, (status == 200 || status == 404));
                 }
             } catch (Exception e) {
-                System.err.println("Exception for " + index);
-                e.printStackTrace();
+                new Failure("Index: " + index, e).printStackTrace(System.err);
             }
+        }
+    }
+
+    static public class Failure extends Exception
+    {
+        Failure(String m, Exception e)
+        {
+            super(m, e);
         }
     }
 
