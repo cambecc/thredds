@@ -28,7 +28,6 @@
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
 
-<<<<<<< HEAD
   <!-- ************************************************** -->
 
   <!-- filters are done in Spring config  -->
