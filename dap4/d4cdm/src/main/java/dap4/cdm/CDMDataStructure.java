@@ -4,20 +4,25 @@
 
 package dap4.cdm;
 
-import dap4.core.data.*;
-import dap4.core.dmr.*;
-import dap4.dap4shared.AbstractData;
+import dap4.core.data.DataException;
+import dap4.core.data.DataStructure;
+import dap4.core.data.DataVariable;
+import dap4.core.dmr.DapAtomicVariable;
+import dap4.core.dmr.DapStructure;
+import dap4.core.dmr.DapVariable;
 import dap4.dap4shared.AbstractDataVariable;
-import ucar.ma2.*;
+import ucar.ma2.Array;
+import ucar.ma2.ArrayStructure;
+import ucar.ma2.StructureData;
+import ucar.ma2.StructureMembers;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 /**
-Define DSP support
-for a single structure instance.
-*/
+ * Define DSP support
+ * for a single structure instance.
+ */
 
 public class CDMDataStructure extends AbstractDataVariable implements DataStructure
 {
@@ -38,7 +43,7 @@ public class CDMDataStructure extends AbstractDataVariable implements DataStruct
     // Constructors
 
     public CDMDataStructure(CDMDSP dsp, DapStructure dap, CDMDataCompoundArray cdv, long recno, StructureData data)
-        throws DataException
+            throws DataException
     {
         super(dap);
         this.dsp = dsp;
@@ -64,18 +69,24 @@ public class CDMDataStructure extends AbstractDataVariable implements DataStruct
         return readfield(member);
     }
 
+    public void
+    addField(int fieldno, DataVariable dvfield)
+    {
+
+    }
+
     // Read ith field
     @Override
     public DataVariable readfield(int i)
-        throws DataException
+            throws DataException
     {
         if(i < 0 || i >= this.members.size())
-            throw new DataException("readfield: index out of bounds: "+i);
+            throw new DataException("readfield: index out of bounds: " + i);
         return readfield(this.members.get(i));
     }
 
     protected DataVariable readfield(StructureMembers.Member member)
-        throws DataException
+            throws DataException
     {
         int index = this.members.indexOf(member);
         DapVariable field = this.dapstruct.getField(index);
@@ -84,10 +95,10 @@ public class CDMDataStructure extends AbstractDataVariable implements DataStruct
             switch (array.getDataType()) {
             case SEQUENCE:
             case STRUCTURE:
-                fieldcache[index] = new CDMDataCompoundArray(dsp,field,(ArrayStructure)array);
+                fieldcache[index] = new CDMDataCompoundArray(dsp, field, (ArrayStructure) array);
                 break;
             default:
-                fieldcache[index] = new CDMDataAtomic(dsp,(DapAtomicVariable)field,array);
+                fieldcache[index] = new CDMDataAtomic(dsp, (DapAtomicVariable) field, array);
                 break;
             }
         }
